@@ -1,0 +1,27 @@
+{
+  "name": "drexter-bot-deployer",
+  "version": "1.0.0",
+  "description": "A colorful Heroku bot deployer and dashboard built by Trashcore Devs.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js"
+  },
+  "keywords": [
+    "heroku",
+    "bot",
+    "deployer",
+    "dashboard",
+    "trashcore",
+    "drexter"
+  ],
+  "author": "Trashcore Devs",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.4",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
