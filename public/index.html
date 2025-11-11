@@ -2,51 +2,231 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>🚀 Drexter Bot Deployer</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trash Bot Deployer</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #e0f7fa;
+      text-align: center;
+      padding: 20px;
+      background-size: 400% 400%;
+      animation: gradient 10s ease infinite;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    h1 { 
+      font-size: 2.2em; 
+      margin-bottom: 8px; 
+      text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+      background: linear-gradient(to right, #00ffcc, #00ccff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p {
+      font-size: 0.95em;
+      margin-bottom: 20px;
+      color: #bbdefb;
+      max-width: 90%;
+      line-height: 1.5;
+    }
+    input, button {
+      padding: 14px;
+      margin: 10px 0;
+      border-radius: 12px;
+      border: 2px solid rgba(0, 255, 204, 0.3);
+      width: 100%;
+      max-width: 280px;
+      font-size: 16px;
+      background: rgba(16, 24, 64, 0.6);
+      color: #e0f7fa;
+      backdrop-filter: blur(4px);
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: #00ffcc;
+      box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+      background: rgba(16, 24, 64, 0.8);
+    }
+    button {
+      background: linear-gradient(45deg, #00ffcc, #00ccff);
+      color: #0a1929;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 17px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(0, 255, 204, 0.3);
+      width: 100%;
+      max-width: 280px;
+    }
+    button:hover { 
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 255, 204, 0.5);
+      background: linear-gradient(45deg, #00ccff, #00ffcc);
+    }
+    button:active {
+      transform: translateY(1px);
+    }
+    .card {
+      background: rgba(16, 24, 64, 0.4);
+      border-radius: 20px;
+      padding: 25px 20px;
+      margin: 15px auto;
+      width: 100%;
+      max-width: 320px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(0, 255, 204, 0.2);
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 255, 204, 0.4);
+      border: 1px solid rgba(0, 255, 204, 0.4);
+    }
+    .link { 
+      color: #00ffcc; 
+      text-decoration: none; 
+      font-weight: bold; 
+      font-size: 1.1em;
+      padding: 12px 20px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    .link:hover { 
+      text-decoration: underline; 
+      background: rgba(0, 255, 204, 0.2);
+      transform: scale(1.05);
+    }
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 320px;
+      font-weight: 500;
+      font-size: 0.95em;
+      word-wrap: break-word;
+    }
+    .footer {
+      margin-top: 25px;
+      color: #90a4ae;
+      font-size: 0.85em;
+      text-align: center;
+    }
+    @media (max-width: 480px) {
+      h1 { font-size: 2em; }
+      p { font-size: 0.9em; }
+      .card { padding: 20px 15px; }
+      input, button { width: 100%; max-width: 100%; }
+      .link { padding: 10px 15px; font-size: 1em; }
+    }
+  </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-500 to-blue-500 text-white flex flex-col items-center justify-center p-6">
+<body>
+  <h1>🚀 Trash Bot Deployer</h1>
+  <p>Deploy Trashcore bot with ease</p>
 
-  <div class="w-full max-w-md bg-white text-gray-800 rounded-2xl shadow-2xl p-6 text-center">
-    <h1 class="text-3xl font-bold mb-2 text-indigo-600">🤖 Drexter Bot Deployer</h1>
-    <p class="text-gray-600 mb-6">Deploy your bot directly to Heroku — fast and easy!</p>
+  <form id="deployForm" class="card">
+    <input type="text" id="username" placeholder="GitHub Username" required><br>
+    <button type="button" id="verifyBtn">Verify Username</button><br>
+    <input type="text" id="appName" placeholder="App Name (unique)" required><br>
+    <input type="text" id="sessionId" placeholder="Session ID / Auth Key" required><br>
+    <button type="submit">Deploy Bot</button>
+  </form>
 
-    <form id="deployForm" class="space-y-4">
-      <input type="text" id="appName" placeholder="Enter Bot Name" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400" required>
-      <input type="text" id="repo" placeholder="GitHub Repo URL" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400" required>
-      <input type="text" id="sessionId" placeholder="Enter Session ID" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400" required>
-
-      <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-3 rounded-lg transition">🚀 Deploy Bot</button>
-    </form>
-
-    <p id="status" class="mt-4 text-sm font-semibold"></p>
-
-    <a href="/dashboard.html" class="block mt-6 text-indigo-600 hover:underline font-semibold">📊 Go to Dashboard</a>
+  <p id="result"></p>
+  <br>
+  <a href="dashboard.html" class="link">⚙️Manage bots</a>
+  <div class="footer">
+    Secure Deployment Platform
   </div>
 
-  <footer class="mt-6 text-sm opacity-80">
-    Made with 💜 by <b>Trashcore Devs</b>
-  </footer>
-
   <script>
-  document.getElementById("deployForm").onsubmit = async (e) => {
-    e.preventDefault();
-    const repo = document.getElementById("repo").value;
-    const appName = document.getElementById("appName").value;
-    const sessionId = document.getElementById("sessionId").value;
+    const API_URL = "https://render-deploy-fhlf.onrender.com ";
+    const REPO_OWNER = "Tennor-modz";
+    const REPO_NAME = "trashcore-ultra";
 
-    const status = document.getElementById("status");
-    status.innerText = "⏳ Deploying... please wait.";
+    async function checkFork(username) {
+      try {
+        const res = await fetch(`https://api.github.com/users/ ${username}/repos`);
+        const repos = await res.json();
+        if (!Array.isArray(repos)) return false;
+        return repos.some(r => r.name === REPO_NAME && r.fork && r.owner.login === username);
+      } catch (err) {
+        console.error(err);
+        return false;
+      }
+    }
 
-    const res = await fetch("/deploy", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ repo, appName, sessionId })
+    document.getElementById("verifyBtn").addEventListener("click", async () => {
+      const username = document.getElementById("username").value.trim();
+      const result = document.getElementById("result");
+      
+      if (!username) {
+        result.textContent = "⚠️ Please enter a GitHub username first.";
+        return;
+      }
+
+      result.textContent = "⏳ Verifying fork...";
+      
+      const hasFork = await checkFork(username);
+      if (!hasFork) {
+        result.textContent = "❌ You must fork Tennor-modz/trashcore-ultra first.";
+        return;
+      }
+      
+      result.textContent = "✅ Fork verified! You can now proceed with deployment.";
     });
 
-    const data = await res.json();
-    status.innerText = data.message;
-  };
+    document.getElementById("deployForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const appName = document.getElementById("appName").value.trim();
+      const sessionId = document.getElementById("sessionId").value.trim();
+
+      const result = document.getElementById("result");
+      
+      // Check if fork exists before proceeding with deployment
+      const hasFork = await checkFork(username);
+      if (!hasFork) {
+        result.textContent = "❌ You must fork Tennor-modz/trashcore-ultra first.";
+        return;
+      }
+
+      result.textContent = "✅ Fork verified! Deploying...";
+
+      try {
+        const forkUrl = `https://github.com/ ${username}/${REPO_NAME}`;
+        const res = await fetch(`${API_URL}/deploy`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ repo: forkUrl, appName, sessionId })
+        });
+        const data = await res.json();
+        result.textContent = data.message;
+      } catch (err) {
+        console.error(err);
+        result.textContent = "⚠️ Deployment failed.";
+      }
+    });
   </script>
 </body>
 </html>
