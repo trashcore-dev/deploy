@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>📊 Bot Dashboard - Drexter AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-600 text-white p-6">
+
+  <div class="max-w-4xl mx-auto bg-white text-gray-800 rounded-2xl shadow-2xl p-6">
+    <h1 class="text-3xl font-bold text-center text-indigo-600 mb-4">📋 Deployed Bots Dashboard</h1>
+    <p class="text-center text-gray-500 mb-6">View all bots deployed under Drexter Hosting</p>
+
+    <div id="bots" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
+    <div class="text-center mt-8">
+      <a href="/" class="text-indigo-600 hover:underline font-semibold">⬅️ Back to Deploy Page</a>
+    </div>
+  </div>
+
+  <script>
+  async function loadBots() {
+    const res = await fetch("/bots");
+    const bots = await res.json();
+
+    const container = document.getElementById("bots");
+    if (bots.length === 0) {
+      container.innerHTML = `<p class="text-center text-gray-500">No bots deployed yet.</p>`;
+      return;
+    }
+
+    container.innerHTML = bots.map(b => `
+      <div class="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl p-4 shadow-md hover:shadow-lg transition">
+        <h3 class="text-xl font-bold text-indigo-700">${b.name}</h3>
+        <p class="text-sm text-gray-600 mt-1"><b>Repo:</b> ${b.repo}</p>
+        <p class="text-sm text-gray-600"><b>Session:</b> ${b.sessionId}</p>
+        <a href="${b.url}" target="_blank" class="inline-block mt-3 bg-indigo-600 hover:bg-indigo-700 text-white py-1 px-3 rounded-lg text-sm">🌐 Open App</a>
+        <p class="text-xs text-gray-500 mt-2">Deployed: ${new Date(b.date).toLocaleString()}</p>
+      </div>
+    `).join("");
+  }
+
+  loadBots();
+  </script>
+
+</body>
+</html>
