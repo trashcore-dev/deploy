@@ -9,7 +9,8 @@
 
   <div class="max-w-6xl mx-auto bg-gray-800 text-gray-100 rounded-3xl shadow-2xl p-6 border border-gray-700">
     <h1 class="text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">🤖 Trash Bot Dashboard</h1>
-    <p class="text-center text-gray-400 mb-8">Manage all deployed bots from this space</p>
+    <p class="text-center text-gray-400 mb-4">Manage all bots from this space </p>
+    <p class="text-center text-gray-400 mb-6">Deployed Bots: <span id="botCount">0</span></p>
 
     <div id="bots" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
@@ -25,6 +26,9 @@
     const res = await fetch("/bots");
     const bots = await res.json();
     const container = document.getElementById("bots");
+    const countEl = document.getElementById("botCount");
+
+    countEl.textContent = bots.length; // <-- update bot counter
 
     if (bots.length === 0) {
       container.innerHTML = `<div class="col-span-full text-center py-12">
