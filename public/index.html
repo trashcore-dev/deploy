@@ -75,6 +75,8 @@ button {
 }
 button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 180, 255, 0.5); }
 button:active { transform: translateY(0); }
+.link { color: #00e6cc; text-decoration: none; font-weight: 600; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; transition: color 0.3s; }
+.link:hover { color: #00b3ff; }
 #logs {
   margin-top: 8px;
   padding: 16px;
@@ -93,6 +95,27 @@ button:active { transform: translateY(0); }
   border: 1px solid rgba(0, 200, 255, 0.1);
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
 }
+.cta-buttons {
+  display: none;
+  gap: 12px;
+  margin-top: 16px;
+}
+.cta-buttons a, .cta-buttons button {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  color: #fff;
+  background: linear-gradient(90deg, #00e6cc, #00b3ff);
+  transition: 0.3s;
+}
+.cta-buttons a:hover, .cta-buttons button:hover {
+  background: linear-gradient(90deg, #00b3ff, #00e6cc);
+}
+
+/* Menu Styles */
 .menu-toggle {
   position: absolute;
   top: 16px;
@@ -111,89 +134,174 @@ button:active { transform: translateY(0); }
   height: 40px;
   transition: all 0.3s ease;
 }
-.menu-toggle span { display: block; width: 20px; height: 2px; background: #e0f7fa; margin: 2px 0; border-radius: 1px; transition: 0.3s; }
-.menu { position: absolute; top: 60px; left: 16px; background: rgba(10,25,35,0.95); backdrop-filter: blur(8px); border-radius: 12px; padding: 12px 0; width: 180px; z-index:100; display:none; }
-.menu a { display: block; padding: 12px 16px; color: #e0f7fa; text-decoration:none; transition: all 0.3s ease; font-size:16px; font-weight:500; }
-.menu a:hover { background: rgba(0,230,204,0.15); color:#00e6cc; }
-.menu.active { display:block; }
+.menu-toggle:hover {
+  background: rgba(10, 25, 47, 0.7);
+  border-color: #00e6cc;
+}
+.menu-toggle span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #e0f7fa;
+  margin: 2px 0;
+  transition: 0.3s;
+  border-radius: 1px;
+}
+.menu {
+  position: absolute;
+  top: 60px;
+  left: 16px;
+  background: rgba(10, 25, 35, 0.95);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 12px 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4),
+              inset 0 0 0 1px rgba(0, 200, 255, 0.1);
+  width: 180px;
+  z-index: 100;
+  display: none;
+}
+.menu a {
+  display: block;
+  padding: 12px 16px;
+  color: #e0f7fa;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  font-weight: 500;
+}
+.menu a:hover {
+  background: rgba(0, 230, 204, 0.15);
+  color: #00e6cc;
+}
+.menu.active {
+  display: block;
+}
 </style>
 </head>
 <body>
 <div class="container">
+  <!-- Menu Toggle Button -->
   <button class="menu-toggle" id="menuToggle">
-    <span></span><span></span><span></span>
+    <span></span>
+    <span></span>
+    <span></span>
   </button>
 
+  <!-- Menu -->
   <div class="menu" id="menu">
-    <a href="#">⚙️ Dashboard</a>
+    <a href="dashboard.html">⚙️ Dashboard</a>
   </div>
 
   <h1>🚀 Trash Bot Deployer</h1>
 
   <div class="card">
-    <input type="text" id="repoUrl" placeholder="GitHub Repo URL" required>
-    <input type="text" id="appName" placeholder="App Name (optional)" >
+    <input type="text" id="username" placeholder="GitHub Username" required>
+    <button type="button" id="verifyBtn">🔍 Verify Username</button>
+    <input type="text" id="appName" placeholder="App Name (unique)" required>
     <input type="text" id="sessionId" placeholder="Session ID / Auth Key" required>
     <button id="deployBtn">⚡ Deploy Bot</button>
   </div>
 
   <pre id="logs">Logs will appear here...</pre>
+  <div class="cta-buttons" id="ctaButtons">
+    <a href="dashboard.html">⚙️ Manage Bots</a>
+    <button id="viewLogsBtn">📄 View Logs</button>
+  </div>
 </div>
 
-<script src="/socket.io/socket.io.js"></script>
 <script>
-const socket = io();
-const logsEl = document.getElementById("logs");
+const API_URL = " https://render-deploy-7mol.onrender.com ";
+const REPO_OWNER = "Tennor-modz";
+const REPO_NAME = "trashcore-ultra";
+let deploymentLogs = "";
 
-document.getElementById("menuToggle").addEventListener("click", () => {
-  document.getElementById("menu").classList.toggle("active");
-});
-document.addEventListener("click", e => {
+// Menu Toggle Functionality
+document.getElementById("menuToggle").addEventListener("click", function() {
   const menu = document.getElementById("menu");
-  const toggle = document.getElementById("menuToggle");
-  if(!menu.contains(e.target) && !toggle.contains(e.target)) menu.classList.remove("active");
+  menu.classList.toggle("active");
+});
+
+// Close menu when clicking outside
+document.addEventListener("click", function(event) {
+  const menu = document.getElementById("menu");
+  const menuToggle = document.getElementById("menuToggle");
+  
+  if (!menu.contains(event.target) && !menuToggle.contains(event.target)) {
+    menu.classList.remove("active");
+  }
+});
+
+async function checkFork(username) {
+  if(username === REPO_OWNER) return true;
+  try {
+    const res = await fetch(`https://api.github.com/repos/ ${username}/${REPO_NAME}`);
+    if(!res.ok) return false;
+    const repo = await res.json();
+    return repo.fork === true && repo.owner.login === username;
+  } catch { return false; }
+}
+
+function forkNow() { window.open(`https://github.com/ ${REPO_OWNER}/${REPO_NAME}/fork`, "_blank"); }
+
+document.getElementById("verifyBtn").addEventListener("click", async () => {
+  const username = document.getElementById("username").value.trim();
+  const logsEl = document.getElementById("logs");
+  if(!username) { logsEl.textContent = "⚠️ Enter GitHub username first."; return; }
+
+  logsEl.textContent = "⏳ Verifying fork...";
+  const hasFork = await checkFork(username);
+
+  if(!hasFork && username !== REPO_OWNER) {
+    logsEl.innerHTML = `❌ You must fork <strong>${REPO_OWNER}/${REPO_NAME}</strong> first.<br><button onclick="forkNow()">Fork Now</button>`;
+  } else {
+    logsEl.textContent = "✅ Verified! You can now deploy.";
+  }
 });
 
 document.getElementById("deployBtn").addEventListener("click", async () => {
-  const repoUrl = document.getElementById("repoUrl").value.trim();
+  const username = document.getElementById("username").value.trim();
   const appName = document.getElementById("appName").value.trim();
   const sessionId = document.getElementById("sessionId").value.trim();
+  const logsEl = document.getElementById("logs");
+  const ctaButtons = document.getElementById("ctaButtons");
 
-  if(!repoUrl || !sessionId) {
-    logsEl.textContent = "⚠️ Fill required fields!";
-    return;
-  }
+  if(!username || !appName || !sessionId) { logsEl.textContent = "⚠️ Fill all fields."; return; }
 
-  logsEl.textContent = "⏳ Deployment starting...\n";
+  logsEl.textContent = "⏳ Checking fork...";
+  const hasFork = await checkFork(username);
+  if(!hasFork && username !== REPO_OWNER) { logsEl.textContent = "❌ Fork required."; return; }
 
-  try {
-    const res = await fetch("/deploy", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ repoUrl, sessionId, appName })
-    });
-    const data = await res.json();
-    logsEl.textContent += `🚀 Deployment triggered for ${data.appName}\n`;
-  } catch(err) {
-    logsEl.textContent += `❌ Failed to start deployment: ${err.message}\n`;
-  }
-});
+  logsEl.textContent = "✅ Fork verified. Starting deployment...\n";
+  deploymentLogs = "";
 
-// Listen for live logs from server
-socket.on("log", msg => {
-  let color = "#c3e8ef";
-  if(msg.toLowerCase().includes("error")) color="#ff4c4c";
-  else if(msg.toLowerCase().includes("success") || msg.toLowerCase().includes("succeeded")) color="#00ff99";
-  else if(msg.toLowerCase().includes("info")) color="#00b3ff";
+  const forkUrl = `https://github.com/ ${username}/${REPO_NAME}`;
+  const url = `${API_URL}/deploy/${appName}/logs?repo=${encodeURIComponent(forkUrl)}&sessionId=${encodeURIComponent(sessionId)}`;
+  const evtSource = new EventSource(url);
 
-  logsEl.innerHTML += `<span style="color:${color}">${msg}</span>\n`;
-  logsEl.scrollTop = logsEl.scrollHeight;
-});
+  evtSource.onmessage = (event) => {
+    deploymentLogs += event.data + "\n";
+    logsEl.textContent = deploymentLogs;
+    logsEl.scrollTop = logsEl.scrollHeight;
 
-// New bot broadcast
-socket.on("newBot", bot => {
-  logsEl.innerHTML += `<span style="color:#ffd700">✅ New bot deployed: ${bot.name}</span>\n`;
-  logsEl.scrollTop = logsEl.scrollHeight;
+    // If deployment finished
+    if(event.data.includes("Deployment succeeded") || event.data.includes("Deployment failed")) {
+      evtSource.close();
+      ctaButtons.style.display = "flex";
+    }
+  };
+
+  evtSource.onerror = () => {
+    logsEl.textContent += "\n⚠️ Deployment connection closed unexpectedly.";
+    evtSource.close();
+    ctaButtons.style.display = "flex";
+  };
+
+  document.getElementById("viewLogsBtn").addEventListener("click", () => {
+    const blob = new Blob([deploymentLogs], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+  });
 });
 </script>
 </body>
