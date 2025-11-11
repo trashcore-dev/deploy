@@ -211,7 +211,7 @@ button:active { transform: translateY(0); }
 </div>
 
 <script>
-const API_URL = " https://render-deploy-7mol.onrender.com ";
+const API_URL = "https://render-deploy-7mol.onrender.com"; // Fixed
 const REPO_OWNER = "Tennor-modz";
 const REPO_NAME = "trashcore-ultra";
 let deploymentLogs = "";
@@ -226,23 +226,28 @@ document.getElementById("menuToggle").addEventListener("click", function() {
 document.addEventListener("click", function(event) {
   const menu = document.getElementById("menu");
   const menuToggle = document.getElementById("menuToggle");
-  
   if (!menu.contains(event.target) && !menuToggle.contains(event.target)) {
     menu.classList.remove("active");
   }
 });
 
+// Check fork properly
 async function checkFork(username) {
   if(username === REPO_OWNER) return true;
   try {
-    const res = await fetch(`https://api.github.com/repos/ ${username}/${REPO_NAME}`);
+    const res = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}`);
     if(!res.ok) return false;
     const repo = await res.json();
     return repo.fork === true && repo.owner.login === username;
-  } catch { return false; }
+  } catch { 
+    return false; 
+  }
 }
 
-function forkNow() { window.open(`https://github.com/ ${REPO_OWNER}/${REPO_NAME}/fork`, "_blank"); }
+// Fork button
+function forkNow() {
+  window.open(`https://github.com/${REPO_OWNER}/${REPO_NAME}/fork`, "_blank");
+}
 
 document.getElementById("verifyBtn").addEventListener("click", async () => {
   const username = document.getElementById("username").value.trim();
@@ -275,7 +280,7 @@ document.getElementById("deployBtn").addEventListener("click", async () => {
   logsEl.textContent = "✅ Fork verified. Starting deployment...\n";
   deploymentLogs = "";
 
-  const forkUrl = `https://github.com/ ${username}/${REPO_NAME}`;
+  const forkUrl = `https://github.com/${username}/${REPO_NAME}`;
   const url = `${API_URL}/deploy/${appName}/logs?repo=${encodeURIComponent(forkUrl)}&sessionId=${encodeURIComponent(sessionId)}`;
   const evtSource = new EventSource(url);
 
@@ -284,7 +289,6 @@ document.getElementById("deployBtn").addEventListener("click", async () => {
     logsEl.textContent = deploymentLogs;
     logsEl.scrollTop = logsEl.scrollHeight;
 
-    // If deployment finished
     if(event.data.includes("Deployment succeeded") || event.data.includes("Deployment failed")) {
       evtSource.close();
       ctaButtons.style.display = "flex";
