@@ -181,14 +181,12 @@ button:active { transform: translateY(0); }
 </head>
 <body>
 <div class="container">
-  <!-- Menu Toggle Button -->
   <button class="menu-toggle" id="menuToggle">
     <span></span>
     <span></span>
     <span></span>
   </button>
 
-  <!-- Menu -->
   <div class="menu" id="menu">
     <a href="dashboard.html">⚙️ Dashboard</a>
   </div>
@@ -211,22 +209,17 @@ button:active { transform: translateY(0); }
 </div>
 
 <script>
-const API_URL = " https://render-deploy-7mol.onrender.com ";
+const API_URL = "https://render-deploy-7mol.onrender.com";
 const REPO_OWNER = "Tennor-modz";
 const REPO_NAME = "trashcore-ultra";
 let deploymentLogs = "";
 
-// Menu Toggle Functionality
 document.getElementById("menuToggle").addEventListener("click", function() {
-  const menu = document.getElementById("menu");
-  menu.classList.toggle("active");
+  document.getElementById("menu").classList.toggle("active");
 });
-
-// Close menu when clicking outside
 document.addEventListener("click", function(event) {
   const menu = document.getElementById("menu");
   const menuToggle = document.getElementById("menuToggle");
-  
   if (!menu.contains(event.target) && !menuToggle.contains(event.target)) {
     menu.classList.remove("active");
   }
@@ -235,23 +228,21 @@ document.addEventListener("click", function(event) {
 async function checkFork(username) {
   if(username === REPO_OWNER) return true;
   try {
-    const res = await fetch(`https://api.github.com/repos/ ${username}/${REPO_NAME}`);
+    const res = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}`);
     if(!res.ok) return false;
     const repo = await res.json();
     return repo.fork === true && repo.owner.login === username;
   } catch { return false; }
 }
 
-function forkNow() { window.open(`https://github.com/ ${REPO_OWNER}/${REPO_NAME}/fork`, "_blank"); }
+function forkNow() { window.open(`https://github.com/${REPO_OWNER}/${REPO_NAME}/fork`, "_blank"); }
 
 document.getElementById("verifyBtn").addEventListener("click", async () => {
   const username = document.getElementById("username").value.trim();
   const logsEl = document.getElementById("logs");
   if(!username) { logsEl.textContent = "⚠️ Enter GitHub username first."; return; }
-
   logsEl.textContent = "⏳ Verifying fork...";
   const hasFork = await checkFork(username);
-
   if(!hasFork && username !== REPO_OWNER) {
     logsEl.innerHTML = `❌ You must fork <strong>${REPO_OWNER}/${REPO_NAME}</strong> first.<br><button onclick="forkNow()">Fork Now</button>`;
   } else {
@@ -268,40 +259,79 @@ document.getElementById("deployBtn").addEventListener("click", async () => {
 
   if(!username || !appName || !sessionId) { logsEl.textContent = "⚠️ Fill all fields."; return; }
 
-  logsEl.textContent = "⏳ Checking fork...";
+  logsEl.innerHTML = "⏳ Checking fork...\n";
   const hasFork = await checkFork(username);
-  if(!hasFork && username !== REPO_OWNER) { logsEl.textContent = "❌ Fork required."; return; }
+  if(!hasFork && username !== REPO_OWNER) { logsEl.innerHTML = "❌ Fork required."; return; }
 
-  logsEl.textContent = "✅ Fork verified. Starting deployment...\n";
+  logsEl.innerHTML += "✅ Fork verified. Starting deployment...\n";
   deploymentLogs = "";
 
-  const forkUrl = `https://github.com/ ${username}/${REPO_NAME}`;
+  const forkUrl = `https://github.com/${username}/${REPO_NAME}`;
   const url = `${API_URL}/deploy/${appName}/logs?repo=${encodeURIComponent(forkUrl)}&sessionId=${encodeURIComponent(sessionId)}`;
   const evtSource = new EventSource(url);
 
-  evtSource.onmessage = (event) => {
-    deploymentLogs += event.data + "\n";
-    logsEl.textContent = deploymentLogs;
-    logsEl.scrollTop = logsEl.scrollHeight;
+  const logQueue = [];
+  let animating = false;
 
-    // If deployment finished
-    if(event.data.includes("Deployment succeeded") || event.data.includes("Deployment failed")) {
+  function animateLogs() {
+    if(animating || logQueue.length === 0) return;
+    animating = true;
+    const interval = setInterval(() => {
+      if(logQueue.length === 0) {
+        clearInterval(interval);
+        animating = false;
+        return;
+      }
+      const line = logQueue.shift();
+      deploymentLogs += line + "<br>";
+      logsEl.innerHTML = deploymentLogs;
+      logsEl.scrollTop = logsEl.scrollHeight;
+    }, 60);
+  }
+
+  function simulateHerokuStep(msg) {
+    logQueue.push(`<span style="color:#c3e8ef;">${msg}</span>`);
+    animateLogs();
+  }
+
+  // Optional: simulate steps for a better visual
+  simulateHerokuStep("😅 Unpacking archive...");
+  setTimeout(() => simulateHerokuStep("📦 Installing dependencies..."), 500);
+  setTimeout(() => simulateHerokuStep("🔧 Building source..."), 1200);
+
+  evtSource.onmessage = (event) => {
+    let line = event.data;
+
+    if(line.includes("✅") || line.toLowerCase().includes("succeeded")) 
+      line = `<span style="color:#00ff99;">${line}</span>`;
+    else if(line.includes("⚠️")) 
+      line = `<span style="color:#ffcc00;">${line}</span>`;
+    else if(line.includes("❌") || line.toLowerCase().includes("failed")) 
+      line = `<span style="color:#ff4c4c;">${line}</span>`;
+    else 
+      line = `<span style="color:#c3e8ef;">${line}</span>`;
+
+    logQueue.push(line);
+    animateLogs();
+
+    if(line.toLowerCase().includes("deployment succeeded") || line.toLowerCase().includes("deployment failed")) {
       evtSource.close();
       ctaButtons.style.display = "flex";
     }
   };
 
   evtSource.onerror = () => {
-    logsEl.textContent += "\n⚠️ Deployment connection closed unexpectedly.";
+    logQueue.push(`<span style="color:#ff4c4c;">⚠️ Deployment connection closed unexpectedly.</span>`);
+    animateLogs();
     evtSource.close();
     ctaButtons.style.display = "flex";
   };
 
-  document.getElementById("viewLogsBtn").addEventListener("click", () => {
-    const blob = new Blob([deploymentLogs], { type: "text/plain" });
+  document.getElementById("viewLogsBtn").onclick = () => {
+    const blob = new Blob([deploymentLogs.replace(/<[^>]*>/g, "")], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank");
-  });
+  };
 });
 </script>
 </body>
