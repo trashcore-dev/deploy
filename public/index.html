@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🚀 Drexter Bot Deployer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-500 to-blue-500 text-white flex flex-col items-center justify-center p-6">
+
+  <div class="w-full max-w-md bg-white text-gray-800 rounded-2xl shadow-2xl p-6 text-center">
+    <h1 class="text-3xl font-bold mb-2 text-indigo-600">🤖 Drexter Bot Deployer</h1>
+    <p class="text-gray-600 mb-6">Deploy your bot directly to Heroku — fast and easy!</p>
+
+    <form id="deployForm" class="space-y-4">
+      <input type="text" id="appName" placeholder="Enter Bot Name" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400" required>
+      <input type="text" id="repo" placeholder="GitHub Repo URL" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400" required>
+      <input type="text" id="sessionId" placeholder="Enter Session ID" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400" required>
+
+      <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-3 rounded-lg transition">🚀 Deploy Bot</button>
+    </form>
+
+    <p id="status" class="mt-4 text-sm font-semibold"></p>
+
+    <a href="/dashboard.html" class="block mt-6 text-indigo-600 hover:underline font-semibold">📊 Go to Dashboard</a>
+  </div>
+
+  <footer class="mt-6 text-sm opacity-80">
+    Made with 💜 by <b>Trashcore Devs</b>
+  </footer>
+
+  <script>
+  document.getElementById("deployForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const repo = document.getElementById("repo").value;
+    const appName = document.getElementById("appName").value;
+    const sessionId = document.getElementById("sessionId").value;
+
+    const status = document.getElementById("status");
+    status.innerText = "⏳ Deploying... please wait.";
+
+    const res = await fetch("/deploy", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ repo, appName, sessionId })
+    });
+
+    const data = await res.json();
+    status.innerText = data.message;
+  };
+  </script>
+</body>
+</html>
