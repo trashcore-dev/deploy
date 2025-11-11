@@ -5,16 +5,18 @@
   <title>📊 Drexter Bot Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white p-6">
+<body class="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 text-white p-4">
 
-  <div class="max-w-5xl mx-auto bg-white text-gray-800 rounded-2xl shadow-2xl p-6">
-    <h1 class="text-3xl font-bold text-center text-indigo-600 mb-4">🤖 Drexter Bot Dashboard</h1>
-    <p class="text-center text-gray-500 mb-6">Manage all deployed bots under your Heroku account</p>
+  <div class="max-w-6xl mx-auto bg-gray-800 text-gray-100 rounded-3xl shadow-2xl p-6 border border-gray-700">
+    <h1 class="text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">🤖 Trash Bot Dashboard</h1>
+    <p class="text-center text-gray-400 mb-8">Manage all deployed bots from this space</p>
 
     <div id="bots" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-    <div class="text-center mt-8">
-      <a href="/" class="text-indigo-600 hover:underline font-semibold">⬅️ Back to Deploy Page</a>
+    <div class="text-center mt-10">
+      <a href="/" class="text-cyan-400 hover:text-cyan-300 font-semibold text-lg inline-flex items-center gap-2 transition-all duration-300">
+        <span class="inline-block transform group-hover:-translate-x-1 transition-transform">⬅️</span> Back to Deploy Page
+      </a>
     </div>
   </div>
 
@@ -25,23 +27,39 @@
     const container = document.getElementById("bots");
 
     if (bots.length === 0) {
-      container.innerHTML = `<p class="text-center text-gray-500">No bots deployed yet.</p>`;
+      container.innerHTML = `<div class="col-span-full text-center py-12">
+        <div class="text-6xl mb-4">🤖</div>
+        <p class="text-xl text-gray-400">No bots deployed yet.</p>
+        <p class="text-gray-500 mt-2">Deploy your first bot to get started!</p>
+      </div>`;
       return;
     }
 
     container.innerHTML = bots.map(b => `
-      <div class="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl p-4 shadow-md hover:shadow-lg transition relative">
-        <h3 class="text-xl font-bold text-indigo-700 mb-2">${b.name}</h3>
-        <p class="text-sm text-gray-600"><b>Repo:</b> ${b.repo}</p>
-        <p class="text-sm text-gray-600"><b>Session:</b> ${b.sessionId}</p>
-        <a href="${b.url}" target="_blank" class="inline-block mt-3 bg-indigo-600 hover:bg-indigo-700 text-white py-1 px-3 rounded-lg text-sm">🌐 Open App</a>
+      <div class="bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl p-5 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-600 hover:border-cyan-500/50 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="relative z-10">
+          <h3 class="text-2xl font-bold text-cyan-400 mb-3 flex items-center gap-2">
+            <span class="inline-block w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></span>
+            ${b.name}
+          </h3>
+          <p class="text-sm text-gray-300 mb-2"><b class="text-gray-400">🔗 Repo:</b> <span class="truncate block max-w-full">${b.repo}</span></p>
+          <p class="text-sm text-gray-300 mb-4"><b class="text-gray-400">🔑 Session:</b> <span class="truncate block max-w-full">${b.sessionId}</span></p>
+          <a href="${b.url}" target="_blank" class="inline-block w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white py-2 px-4 rounded-xl text-center font-medium transition-all duration-300 transform hover:scale-[1.02]">
+            🌐 Open App
+          </a>
 
-        <div class="mt-4 flex gap-3">
-          <button onclick="restartBot('${b.name}')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded-md text-sm">🔁 Restart</button>
-          <button onclick="deleteBot('${b.name}')" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md text-sm">🗑 Delete</button>
+          <div class="mt-5 flex flex-col sm:flex-row gap-3">
+            <button onclick="restartBot('${b.name}')" class="flex-1 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white py-2 px-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2">
+              <span>🔁</span> Restart
+            </button>
+            <button onclick="deleteBot('${b.name}')" class="flex-1 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white py-2 px-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2">
+              <span>🗑</span> Delete
+            </button>
+          </div>
+
+          <p class="text-xs text-gray-500 mt-4">📅 Deployed: ${new Date(b.date).toLocaleString()}</p>
         </div>
-
-        <p class="text-xs text-gray-500 mt-2">Deployed: ${new Date(b.date).toLocaleString()}</p>
       </div>
     `).join("");
   }
