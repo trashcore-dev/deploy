@@ -33,136 +33,54 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    p {
-      font-size: 0.95em;
-      margin-bottom: 20px;
-      color: #bbdefb;
-      max-width: 90%;
-      line-height: 1.5;
-    }
+    p { font-size: 0.95em; margin-bottom: 20px; color: #bbdefb; max-width: 90%; line-height: 1.5; }
     input, button {
-      padding: 14px;
-      margin: 10px 0;
-      border-radius: 12px;
-      border: 2px solid rgba(0, 255, 204, 0.3);
-      width: 100%;
-      max-width: 280px;
-      font-size: 16px;
-      background: rgba(16, 24, 64, 0.6);
-      color: #e0f7fa;
-      backdrop-filter: blur(4px);
-      transition: all 0.3s ease;
-      box-sizing: border-box;
+      padding: 14px; margin: 10px 0; border-radius: 12px; border: 2px solid rgba(0, 255, 204, 0.3);
+      width: 100%; max-width: 280px; font-size: 16px; background: rgba(16, 24, 64, 0.6);
+      color: #e0f7fa; backdrop-filter: blur(4px); transition: all 0.3s ease; box-sizing: border-box;
     }
-    input:focus {
-      outline: none;
-      border-color: #00ffcc;
-      box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
-      background: rgba(16, 24, 64, 0.8);
+    input:focus { outline: none; border-color: #00ffcc; box-shadow: 0 0 15px rgba(0, 255, 204, 0.4); background: rgba(16, 24, 64, 0.8); }
+    button { background: linear-gradient(45deg, #00ffcc, #00ccff); color: #0a1929; font-weight: bold; cursor: pointer; transition: all 0.3s ease; font-size: 17px; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(0, 255, 204, 0.3); width: 100%; max-width: 280px; }
+    button:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0, 255, 204, 0.5); background: linear-gradient(45deg, #00ccff, #00ffcc); }
+    button:active { transform: translateY(1px); }
+    .card { background: rgba(16, 24, 64, 0.4); border-radius: 20px; padding: 25px 20px; margin: 15px auto; width: 100%; max-width: 320px; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 255, 204, 0.2); transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0, 255, 204, 0.4); border: 1px solid rgba(0, 255, 204, 0.4); }
+    .link { color: #00ffcc; text-decoration: none; font-weight: bold; font-size: 1.1em; padding: 12px 20px; border-radius: 10px; background: rgba(0, 0, 0, 0.2); transition: all 0.3s ease; display: inline-block; margin-top: 10px; }
+    .link:hover { text-decoration: underline; background: rgba(0, 255, 204, 0.2); transform: scale(1.05); }
+    #logs {
+      margin-top: 20px; padding: 15px; border-radius: 10px; background: rgba(0, 0, 0, 0.2);
+      width: 100%; max-width: 320px; font-weight: 500; font-size: 0.9em; word-wrap: break-word; max-height: 300px; overflow-y: auto; text-align: left;
+      white-space: pre-wrap;
     }
-    button {
-      background: linear-gradient(45deg, #00ffcc, #00ccff);
-      color: #0a1929;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 17px;
-      letter-spacing: 0.5px;
-      box-shadow: 0 4px 15px rgba(0, 255, 204, 0.3);
-      width: 100%;
-      max-width: 280px;
-    }
-    button:hover { 
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(0, 255, 204, 0.5);
-      background: linear-gradient(45deg, #00ccff, #00ffcc);
-    }
-    button:active {
-      transform: translateY(1px);
-    }
-    .card {
-      background: rgba(16, 24, 64, 0.4);
-      border-radius: 20px;
-      padding: 25px 20px;
-      margin: 15px auto;
-      width: 100%;
-      max-width: 320px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(0, 255, 204, 0.2);
-      transition: all 0.3s ease;
-    }
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 40px rgba(0, 255, 204, 0.4);
-      border: 1px solid rgba(0, 255, 204, 0.4);
-    }
-    .link { 
-      color: #00ffcc; 
-      text-decoration: none; 
-      font-weight: bold; 
-      font-size: 1.1em;
-      padding: 12px 20px;
-      border-radius: 10px;
-      background: rgba(0, 0, 0, 0.2);
-      transition: all 0.3s ease;
-      display: inline-block;
-      margin-top: 10px;
-    }
-    .link:hover { 
-      text-decoration: underline; 
-      background: rgba(0, 255, 204, 0.2);
-      transform: scale(1.05);
-    }
-    #result {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 10px;
-      background: rgba(0, 0, 0, 0.2);
-      width: 100%;
-      max-width: 320px;
-      font-weight: 500;
-      font-size: 0.95em;
-      word-wrap: break-word;
-    }
-    .footer {
-      margin-top: 25px;
-      color: #90a4ae;
-      font-size: 0.85em;
-      text-align: center;
-    }
+    .footer { margin-top: 25px; color: #90a4ae; font-size: 0.85em; text-align: center; }
   </style>
 </head>
 <body>
   <h1>🚀 Trash Bot Deployer</h1>
-  <p>Deploy Trashcore bot with ease</p>
+  <p>Deploy Trashcore bot with real-time Heroku logs</p>
 
   <form id="deployForm" class="card">
     <input type="text" id="username" placeholder="GitHub Username" required><br>
-    <button type="button" id="verifyBtn">Verify Username</button><br>
     <input type="text" id="appName" placeholder="App Name (unique)" required><br>
     <input type="text" id="sessionId" placeholder="Session ID / Auth Key" required><br>
     <button type="submit">Deploy Bot</button>
   </form>
 
-  <p id="result"></p>
+  <div id="logs"></div>
   <br>
-  <a href="dashboard.html" class="link">⚙️Manage bots</a>
+  <a href="dashboard.html" class="link">⚙️ Manage bots</a>
   <div class="footer">Secure Deployment Platform</div>
 
   <script>
-    const API_URL = "https://render-deploy-7mol.onrender.com"; // fixed
+    const API_URL = "https://render-deploy-7mol.onrender.com";
     const REPO_OWNER = "Tennor-modz";
     const REPO_NAME = "trashcore-ultra";
 
     async function checkFork(username) {
-      // Owner can deploy directly
       if (username === REPO_OWNER) return true;
-
       try {
-        // Check if the repo exists under the username
         const res = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}`);
-        if (!res.ok) return false; // Repo doesn't exist
+        if (!res.ok) return false;
         const repo = await res.json();
         return repo.fork === true && repo.owner.login === username;
       } catch (err) {
@@ -171,51 +89,52 @@
       }
     }
 
-    document.getElementById("verifyBtn").addEventListener("click", async () => {
-      const username = document.getElementById("username").value.trim();
-      const result = document.getElementById("result");
-      if (!username) { result.textContent = "⚠️ Enter GitHub username first."; return; }
-
-      result.textContent = "⏳ Verifying fork...";
-      const hasFork = await checkFork(username);
-
-      if (!hasFork && username !== REPO_OWNER) {
-        result.innerHTML = '❌ You must fork Tennor-modz/trashcore-ultra first. <button onclick="forkNow()" class="mt-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white py-1 px-3 rounded-md text-sm transition-all duration-300"> Fork Now </button>';
-      } else {
-        result.textContent = "✅ Verified! You can now deploy.";
-      }
-    });
-
-    function forkNow() {
-      window.open(`https://github.com/${REPO_OWNER}/${REPO_NAME}/fork`, '_blank');
-    }
-
     document.getElementById("deployForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const username = document.getElementById("username").value.trim();
       const appName = document.getElementById("appName").value.trim();
       const sessionId = document.getElementById("sessionId").value.trim();
-      const result = document.getElementById("result");
+      const logsDiv = document.getElementById("logs");
+      logsDiv.textContent = "";
 
-      if (!username || !appName || !sessionId) { result.textContent = "⚠️ Fill all fields."; return; }
+      if (!username || !appName || !sessionId) {
+        logsDiv.textContent = "⚠️ Fill all fields.";
+        return;
+      }
 
-      result.textContent = "⏳ Checking fork...";
+      logsDiv.textContent = "⏳ Verifying fork...";
       const hasFork = await checkFork(username);
-      if (!hasFork && username !== REPO_OWNER) { result.textContent = "❌ Fork required."; return; }
+      if (!hasFork && username !== REPO_OWNER) {
+        logsDiv.textContent = "❌ Fork Tennor-modz/trashcore-ultra first.";
+        return;
+      }
 
-      result.textContent = "✅ Deploying...";
+      logsDiv.textContent = "✅ Fork verified. Starting deployment...";
+
       try {
         const forkUrl = `https://github.com/${username}/${REPO_NAME}`;
-        const res = await fetch(`${API_URL}/deploy`, {
+
+        // Trigger deployment
+        await fetch(`${API_URL}/deploy`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ repo: forkUrl, appName, sessionId })
         });
-        const data = await res.json();
-        result.textContent = data.message;
+
+        // Listen to SSE logs
+        const evtSource = new EventSource(`${API_URL}/deploy/${encodeURIComponent(appName)}/logs?repo=${encodeURIComponent(forkUrl)}&sessionId=${encodeURIComponent(sessionId)}`);
+        evtSource.onmessage = (e) => {
+          logsDiv.textContent += e.data + "\n";
+          logsDiv.scrollTop = logsDiv.scrollHeight; // auto scroll
+        };
+        evtSource.onerror = () => {
+          logsDiv.textContent += "\n⚠️ Connection closed.";
+          evtSource.close();
+        };
+
       } catch (err) {
         console.error(err);
-        result.textContent = "⚠️ Deployment failed. Check backend or Heroku API key.";
+        logsDiv.textContent = "⚠️ Deployment failed. Check backend logs or Heroku API key.";
       }
     });
   </script>
