@@ -131,13 +131,6 @@
       font-size: 0.85em;
       text-align: center;
     }
-    @media (max-width: 480px) {
-      h1 { font-size: 2em; }
-      p { font-size: 0.9em; }
-      .card { padding: 20px 15px; }
-      input, button { width: 100%; max-width: 100%; }
-      .link { padding: 10px 15px; font-size: 1em; }
-    }
   </style>
 </head>
 <body>
@@ -155,36 +148,25 @@
   <p id="result"></p>
   <br>
   <a href="dashboard.html" class="link">⚙️Manage bots</a>
-  <div class="footer">
-    Secure Deployment Platform
-  </div>
+  <div class="footer">Secure Deployment Platform</div>
 
   <script>
-    const API_URL = "https://render-deploy-fhlf.onrender.com  ";
+    const API_URL = "https://render-deploy-fhlf.onrender.com"; // fixed
     const REPO_OWNER = "Tennor-modz";
     const REPO_NAME = "trashcore-ultra";
 
     async function checkFork(username) {
-      // If user is the repo owner, no need to fork
-      if (username === REPO_OWNER) {
-        return true;
-      }
-      
-      try {
-        // Query the forks of the original repository
-        const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/forks`);
-        const forks = await res.json();
+      // Owner can deploy directly
+      if (username === REPO_OWNER) return true;
 
-        // Check if the response is an array and if the user's name appears among the forks' owners
-        if (Array.isArray(forks)) {
-          return forks.some(fork => fork.owner.login === username);
-        } else {
-          // If the response isn't an array (e.g., error), return false
-          console.error("API response for forks was not an array:", forks);
-          return false;
-        }
+      try {
+        // Check if the repo exists under the username
+        const res = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}`);
+        if (!res.ok) return false; // Repo doesn't exist
+        const repo = await res.json();
+        return repo.fork === true && repo.owner.login === username;
       } catch (err) {
-        console.error("Error checking forks:", err);
+        console.error("Error checking fork:", err);
         return false;
       }
     }
@@ -192,28 +174,15 @@
     document.getElementById("verifyBtn").addEventListener("click", async () => {
       const username = document.getElementById("username").value.trim();
       const result = document.getElementById("result");
-      
-      if (!username) {
-        result.textContent = "⚠️ Please enter a GitHub username first.";
-        return;
-      }
+      if (!username) { result.textContent = "⚠️ Enter GitHub username first."; return; }
 
       result.textContent = "⏳ Verifying fork...";
-      
       const hasFork = await checkFork(username);
-      if (!hasFork) {
-        if (username === REPO_OWNER) {
-          result.textContent = "✅ You are the repository owner. You can proceed with deployment.";
-        } else {
-          result.innerHTML = '❌ You must fork Tennor-modz/trashcore-ultra first. <button onclick="forkNow()" class="mt-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white py-1 px-3 rounded-md text-sm transition-all duration-300"> Fork Now </button>';
-        }
-        return;
-      }
-      
-      if (username === REPO_OWNER) {
-        result.textContent = "✅ You are the repository owner. You can proceed with deployment.";
+
+      if (!hasFork && username !== REPO_OWNER) {
+        result.innerHTML = '❌ You must fork Tennor-modz/trashcore-ultra first. <button onclick="forkNow()" class="mt-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white py-1 px-3 rounded-md text-sm transition-all duration-300"> Fork Now </button>';
       } else {
-        result.textContent = "✅ Fork verified! You can now proceed with deployment.";
+        result.textContent = "✅ Verified! You can now deploy.";
       }
     });
 
@@ -226,28 +195,17 @@
       const username = document.getElementById("username").value.trim();
       const appName = document.getElementById("appName").value.trim();
       const sessionId = document.getElementById("sessionId").value.trim();
-
       const result = document.getElementById("result");
-      
-      // Check if fork exists before proceeding with deployment
+
+      if (!username || !appName || !sessionId) { result.textContent = "⚠️ Fill all fields."; return; }
+
+      result.textContent = "⏳ Checking fork...";
       const hasFork = await checkFork(username);
-      if (!hasFork) {
-        if (username === REPO_OWNER) {
-          result.textContent = "✅ You are the repository owner. You can proceed with deployment.";
-        } else {
-          result.innerHTML = '❌ You must fork Tennor-modz/trashcore-ultra first. <button onclick="forkNow()" class="mt-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white py-1 px-3 rounded-md text-sm transition-all duration-300"> Fork Now </button>';
-        }
-        return;
-      }
+      if (!hasFork && username !== REPO_OWNER) { result.textContent = "❌ Fork required."; return; }
 
-      if (username === REPO_OWNER) {
-        result.textContent = "✅ You are the repository owner. Deploying...";
-      } else {
-        result.textContent = "✅ Fork verified! Deploying...";
-      }
-
+      result.textContent = "✅ Deploying...";
       try {
-        const forkUrl = `https://github.com/  ${username}/${REPO_NAME}`;
+        const forkUrl = `https://github.com/${username}/${REPO_NAME}`;
         const res = await fetch(`${API_URL}/deploy`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -257,7 +215,7 @@
         result.textContent = data.message;
       } catch (err) {
         console.error(err);
-        result.textContent = "⚠️ Deployment failed.";
+        result.textContent = "⚠️ Deployment failed. Check backend or Heroku API key.";
       }
     });
   </script>
