@@ -216,22 +216,17 @@ const REPO_OWNER = "Tennor-modz";
 const REPO_NAME = "trashcore-ultra";
 let deploymentLogs = "";
 
-// Menu Toggle Functionality
-document.getElementById("menuToggle").addEventListener("click", function() {
+// Menu Toggle
+document.getElementById("menuToggle").addEventListener("click", () => {
+  document.getElementById("menu").classList.toggle("active");
+});
+document.addEventListener("click", (e) => {
   const menu = document.getElementById("menu");
-  menu.classList.toggle("active");
+  const toggle = document.getElementById("menuToggle");
+  if(!menu.contains(e.target) && !toggle.contains(e.target)) menu.classList.remove("active");
 });
 
-// Close menu when clicking outside
-document.addEventListener("click", function(event) {
-  const menu = document.getElementById("menu");
-  const menuToggle = document.getElementById("menuToggle");
-  if (!menu.contains(event.target) && !menuToggle.contains(event.target)) {
-    menu.classList.remove("active");
-  }
-});
-
-// Check fork properly
+// Fork check
 async function checkFork(username) {
   if(username === REPO_OWNER) return true;
   try {
@@ -239,9 +234,7 @@ async function checkFork(username) {
     if(!res.ok) return false;
     const repo = await res.json();
     return repo.fork === true && repo.owner.login === username;
-  } catch { 
-    return false; 
-  }
+  } catch { return false; }
 }
 
 // Fork button
@@ -280,8 +273,8 @@ document.getElementById("deployBtn").addEventListener("click", async () => {
   logsEl.textContent = "✅ Fork verified. Starting deployment...\n";
   deploymentLogs = "";
 
-  const forkUrl = `https://github.com/${username}/${REPO_NAME}`;
-  const url = `${API_URL}/deploy/${appName}/logs?repo=${encodeURIComponent(forkUrl)}&sessionId=${encodeURIComponent(sessionId)}`;
+  const tarballUrl = `https://github.com/${username}/${REPO_NAME}/archive/refs/heads/main.tar.gz`;
+  const url = `${API_URL}/deploy/${appName}/logs?repo=${encodeURIComponent(tarballUrl)}&sessionId=${encodeURIComponent(sessionId)}`;
   const evtSource = new EventSource(url);
 
   evtSource.onmessage = (event) => {
