@@ -171,12 +171,20 @@
       }
       
       try {
-        const res = await fetch(`https://api.github.com/users/  ${username}/repos`);
-        const repos = await res.json();
-        if (!Array.isArray(repos)) return false;
-        return repos.some(r => r.name === REPO_NAME && r.fork && r.owner.login === username);
+        // Query the forks of the original repository
+        const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/forks`);
+        const forks = await res.json();
+
+        // Check if the response is an array and if the user's name appears among the forks' owners
+        if (Array.isArray(forks)) {
+          return forks.some(fork => fork.owner.login === username);
+        } else {
+          // If the response isn't an array (e.g., error), return false
+          console.error("API response for forks was not an array:", forks);
+          return false;
+        }
       } catch (err) {
-        console.error(err);
+        console.error("Error checking forks:", err);
         return false;
       }
     }
