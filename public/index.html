@@ -77,6 +77,7 @@ button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 180, 
 button:active { transform: translateY(0); }
 .link { color: #00e6cc; text-decoration: none; font-weight: 600; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; transition: color 0.3s; }
 .link:hover { color: #00b3ff; }
+
 #logs {
   margin-top: 8px;
   padding: 16px;
@@ -95,6 +96,11 @@ button:active { transform: translateY(0); }
   border: 1px solid rgba(0, 200, 255, 0.1);
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
 }
+
+/* Error highlight */
+.log-error { color: #ff5555; font-weight: 600; }
+.log-warning { color: #ffa500; font-weight: 600; }
+
 .cta-buttons {
   display: none;
   gap: 12px;
@@ -181,14 +187,12 @@ button:active { transform: translateY(0); }
 </head>
 <body>
 <div class="container">
-  <!-- Menu Toggle Button -->
   <button class="menu-toggle" id="menuToggle">
     <span></span>
     <span></span>
     <span></span>
   </button>
 
-  <!-- Menu -->
   <div class="menu" id="menu">
     <a href="dashboard.html">⚙️ Dashboard</a>
   </div>
@@ -211,12 +215,11 @@ button:active { transform: translateY(0); }
 </div>
 
 <script>
-const API_URL = "https://render-deploy-7mol.onrender.com"; // Fixed
+const API_URL = "https://render-deploy-7mol.onrender.com";
 const REPO_OWNER = "Tennor-modz";
 const REPO_NAME = "trashcore-ultra";
 let deploymentLogs = "";
 
-// Menu Toggle
 document.getElementById("menuToggle").addEventListener("click", () => {
   document.getElementById("menu").classList.toggle("active");
 });
@@ -226,7 +229,6 @@ document.addEventListener("click", (e) => {
   if(!menu.contains(e.target) && !toggle.contains(e.target)) menu.classList.remove("active");
 });
 
-// Fork check
 async function checkFork(username) {
   if(username === REPO_OWNER) return true;
   try {
@@ -237,10 +239,7 @@ async function checkFork(username) {
   } catch { return false; }
 }
 
-// Fork button
-function forkNow() {
-  window.open(`https://github.com/${REPO_OWNER}/${REPO_NAME}/fork`, "_blank");
-}
+function forkNow() { window.open(`https://github.com/${REPO_OWNER}/${REPO_NAME}/fork`, "_blank"); }
 
 document.getElementById("verifyBtn").addEventListener("click", async () => {
   const username = document.getElementById("username").value.trim();
@@ -278,8 +277,19 @@ document.getElementById("deployBtn").addEventListener("click", async () => {
   const evtSource = new EventSource(url);
 
   evtSource.onmessage = (event) => {
-    deploymentLogs += event.data + "\n";
-    logsEl.textContent = deploymentLogs;
+    // Split lines to highlight errors/warnings
+    const lines = event.data.split("\n");
+    lines.forEach(line => {
+      if(line.startsWith("❌")) deploymentLogs += `%c${line}\n`;
+      else if(line.startsWith("⚠️")) deploymentLogs += `%c${line}\n`;
+      else deploymentLogs += line + "\n";
+    });
+
+    // Simple display with color
+    logsEl.innerHTML = event.data
+      .replace(/^❌(.*)$/gm, '<span class="log-error">❌$1</span>')
+      .replace(/^⚠️(.*)$/gm, '<span class="log-warning">⚠️$1</span>');
+
     logsEl.scrollTop = logsEl.scrollHeight;
 
     if(event.data.includes("Deployment succeeded") || event.data.includes("Deployment failed")) {
@@ -289,13 +299,13 @@ document.getElementById("deployBtn").addEventListener("click", async () => {
   };
 
   evtSource.onerror = () => {
-    logsEl.textContent += "\n⚠️ Deployment connection closed unexpectedly.";
+    logsEl.innerHTML += `<span class="log-warning">⚠️ Deployment connection closed unexpectedly.</span>\n`;
     evtSource.close();
     ctaButtons.style.display = "flex";
   };
 
   document.getElementById("viewLogsBtn").addEventListener("click", () => {
-    const blob = new Blob([deploymentLogs], { type: "text/plain" });
+    const blob = new Blob([deploymentLogs.replace(/%c/g, "")], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank");
   });
