@@ -62,10 +62,20 @@
       width: 100%;
       max-width: 400px;
       box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
     .bot-card a {
       color: #3fb950;
       text-decoration: none;
+    }
+    .manage-btn {
+      background-color: #0366d6;
+      font-size: 14px;
+    }
+    .manage-btn:hover {
+      background-color: #0556b6;
     }
     #deployedBotsContainer {
       display: flex;
@@ -114,7 +124,8 @@
           <strong>Status:</strong> 🟢 Active<br>
           <strong>Uptime:</strong> <span class="uptime">00h 00m 00s</span><br>
           <strong>Date:</strong> ${bot.date}<br>
-          <strong>Link:</strong> <a href="${bot.url}" target="_blank">${bot.url}</a>
+          <strong>Link:</strong> <a href="${bot.url}" target="_blank">${bot.url}</a><br>
+          <button class="manage-btn" onclick="window.location.href='manage-bot.html?app=${bot.name}'">⚙️ Manage Bot</button>
         `;
         container.appendChild(card);
         startUptimeTimer(card.querySelector(".uptime"), bot.startTime);
@@ -194,7 +205,8 @@
             <strong>Status:</strong> 🟢 Active<br>
             <strong>Uptime:</strong> <span class="uptime">00h 00m 00s</span><br>
             <strong>Date:</strong> ${botInfo.date}<br>
-            <strong>Link:</strong> <a href="${botInfo.url}" target="_blank">${botInfo.url}</a>
+            <strong>Link:</strong> <a href="${botInfo.url}" target="_blank">${botInfo.url}</a><br>
+            <button class="manage-btn" onclick="window.location.href='manage-bot.html?app=${botInfo.name}'">⚙️ Manage Bot</button>
           `;
           container.prepend(card);
           startUptimeTimer(card.querySelector(".uptime"), botInfo.startTime);
