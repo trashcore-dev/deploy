@@ -14,9 +14,12 @@
       --text-secondary: #a0aec0;
       --accent-blue: #4c6ef5;
       --accent-green: #48bb78;
-      --accent-red: #e53e3e;
       --accent-yellow: #ecc94b;
+      --button-primary: #4c6ef5;
+      --button-success: #48bb78;
+      --button-warning: #ed8936;
     }
+    
     body {
       background: linear-gradient(135deg, var(--bg-primary), #161b29);
       color: var(--text-primary);
@@ -75,12 +78,22 @@
       transition: all 0.3s ease;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    #saveBtn { background: linear-gradient(135deg, var(--accent-green), #38a169); }
-    #saveBtn:hover { background: linear-gradient(135deg, #38a169, #2f855a); }
-    #restartBtn { background: linear-gradient(135deg, #ecc94b, #d69e2e); }
-    #restartBtn:hover { background: linear-gradient(135deg, #d69e2e, #b7791f); }
-    #deleteBtn { background: linear-gradient(135deg, var(--accent-red), #e53e3e); }
-    #deleteBtn:hover { background: linear-gradient(135deg, #e53e3e, #c53030); }
+    #saveBtn {
+      background: linear-gradient(135deg, var(--button-success), #38a169);
+    }
+    #saveBtn:hover {
+      background: linear-gradient(135deg, #38a169, #2f855a);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+    #restartBtn {
+      background: linear-gradient(135deg, var(--button-warning), #dd6b20);
+    }
+    #restartBtn:hover {
+      background: linear-gradient(135deg, #dd6b20, #c05621);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
     #logBox {
       margin-top: 20px;
       background: linear-gradient(135deg, var(--bg-secondary), #1a2230);
@@ -94,29 +107,32 @@
       font-size: 0.9rem;
       box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
     }
-    p { margin: 0 0 15px 0; padding: 10px; background-color: rgba(76, 110, 245, 0.1); border-radius: 8px; border-left: 3px solid var(--accent-blue); }
-    strong { color: var(--text-secondary); }
+    p {
+      margin: 0 0 15px 0;
+      padding: 10px;
+      background-color: rgba(76, 110, 245, 0.1);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent-blue);
+    }
+    strong {
+      color: var(--text-secondary);
+    }
   </style>
 </head>
 <body>
   <h1>⚙️ Manage Bot</h1>
-
   <div class="container">
     <p><strong>App Name:</strong> <span id="appName">Loading...</span></p>
-    
     <label for="sessionInput">Session ID:</label>
     <input type="text" id="sessionInput" placeholder="Enter new session ID">
 
     <button id="saveBtn">💾 Update Session ID</button>
     <button id="restartBtn">🔁 Restart Bot</button>
-    <button id="deleteBtn">🗑 Delete Bot</button>
 
-    <p><strong>Uptime:</strong> <span id="uptime">Loading...</span></p>
     <div id="logBox">📜 Logs will appear here...</div>
   </div>
-
   <script>
-    const API_URL = "https://render-deploy-7mol.onrender.com";
+    const API_URL = "https://render-deploy-7mol.onrender.com"; // Your backend
 
     // Get bot name from URL
     const params = new URLSearchParams(window.location.search);
@@ -125,31 +141,12 @@
 
     const sessionInput = document.getElementById("sessionInput");
     const logBox = document.getElementById("logBox");
-    const uptimeEl = document.getElementById("uptime");
     const saveBtn = document.getElementById("saveBtn");
     const restartBtn = document.getElementById("restartBtn");
-    const deleteBtn = document.getElementById("deleteBtn");
 
-    // --- Load saved session ---
+    // Load saved session from localStorage (optional)
     const savedSessions = JSON.parse(localStorage.getItem("botSessions") || "{}");
     if (savedSessions[appName]) sessionInput.value = savedSessions[appName];
-
-    // --- Load saved start time for uptime ---
-    let savedStartTimes = JSON.parse(localStorage.getItem("botStartTimes") || "{}");
-    let startTime = savedStartTimes[appName] || Date.now();
-    savedStartTimes[appName] = startTime;
-    localStorage.setItem("botStartTimes", JSON.stringify(savedStartTimes));
-
-    // --- Uptime timer like Heroku ---
-    function updateUptime() {
-      const diff = Date.now() - startTime;
-      const hours = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2,'0');
-      const minutes = String(Math.floor((diff / (1000 * 60)) % 60)).padStart(2,'0');
-      const seconds = String(Math.floor((diff / 1000) % 60)).padStart(2,'0');
-      uptimeEl.textContent = `${hours}h:${minutes}m:${seconds}s`;
-    }
-    updateUptime();
-    setInterval(updateUptime, 1000);
 
     // --- Update Session ID ---
     saveBtn.addEventListener("click", async () => {
@@ -166,6 +163,7 @@
         const data = await res.json();
         logBox.textContent += `✅ ${data.message}\n`;
 
+        // Save to localStorage for persistence
         savedSessions[appName] = sessionId;
         localStorage.setItem("botSessions", JSON.stringify(savedSessions));
       } catch (err) {
@@ -181,43 +179,9 @@
         const res = await fetch(`${API_URL}/restart/${appName}`, { method: "POST" });
         const data = await res.json();
         logBox.textContent += `✅ ${data.message}\n`;
-
-        // Reset start time for uptime after dyno restart
-        startTime = Date.now();
-        savedStartTimes[appName] = startTime;
-        localStorage.setItem("botStartTimes", JSON.stringify(savedStartTimes));
       } catch (err) {
         console.error(err);
         logBox.textContent += `❌ Failed to restart bot.\n`;
-      }
-    });
-
-    // --- Delete Bot ---
-    deleteBtn.addEventListener("click", async () => {
-      if (!confirm(`Are you sure you want to delete ${appName}?`)) return;
-
-      logBox.textContent += `\n🗑 Deleting bot...\n`;
-      try {
-        const res = await fetch(`${API_URL}/delete/${appName}`, { method: "DELETE" });
-        const data = await res.json();
-        logBox.textContent += `✅ ${data.message}\n`;
-
-        // Remove from localStorage
-        let allBots = JSON.parse(localStorage.getItem("deployedBots") || "[]");
-        allBots = allBots.filter(b => b.name !== appName);
-        localStorage.setItem("deployedBots", JSON.stringify(allBots));
-
-        // Remove session and uptime
-        delete savedSessions[appName];
-        localStorage.setItem("botSessions", JSON.stringify(savedSessions));
-        delete savedStartTimes[appName];
-        localStorage.setItem("botStartTimes", JSON.stringify(savedStartTimes));
-
-        // Redirect back to dashboard
-        window.location.href = "index.html";
-      } catch (err) {
-        console.error(err);
-        logBox.textContent += `❌ Failed to delete bot.\n`;
       }
     });
   </script>
