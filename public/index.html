@@ -96,8 +96,6 @@ button:active { transform: translateY(0); }
   border: 1px solid rgba(0, 200, 255, 0.1);
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
 }
-
-/* Error highlight */
 .log-error { color: #ff5555; font-weight: 600; }
 .log-warning { color: #ffa500; font-weight: 600; }
 
@@ -140,59 +138,25 @@ button:active { transform: translateY(0); }
   height: 40px;
   transition: all 0.3s ease;
 }
-.menu-toggle:hover {
-  background: rgba(10, 25, 47, 0.7);
-  border-color: #00e6cc;
-}
-.menu-toggle span {
-  display: block;
-  width: 20px;
-  height: 2px;
-  background: #e0f7fa;
-  margin: 2px 0;
-  transition: 0.3s;
-  border-radius: 1px;
-}
-.menu {
-  position: absolute;
-  top: 60px;
-  left: 16px;
-  background: rgba(10, 25, 35, 0.95);
-  backdrop-filter: blur(8px);
-  border-radius: 12px;
-  padding: 12px 0;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4),
-              inset 0 0 0 1px rgba(0, 200, 255, 0.1);
-  width: 180px;
-  z-index: 100;
-  display: none;
-}
-.menu a {
-  display: block;
-  padding: 12px 16px;
-  color: #e0f7fa;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  font-size: 16px;
-  font-weight: 500;
-}
-.menu a:hover {
-  background: rgba(0, 230, 204, 0.15);
-  color: #00e6cc;
-}
-.menu.active {
-  display: block;
-}
+.menu-toggle:hover { background: rgba(10, 25, 47, 0.7); border-color: #00e6cc; }
+.menu-toggle span { display: block; width: 20px; height: 2px; background: #e0f7fa; margin: 2px 0; transition: 0.3s; border-radius: 1px; }
+.menu { position: absolute; top: 60px; left: 16px; background: rgba(10, 25, 35, 0.95); backdrop-filter: blur(8px); border-radius: 12px; padding: 12px 0; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(0, 200, 255, 0.1); width: 180px; z-index: 100; display: none; }
+.menu a { display: block; padding: 12px 16px; color: #e0f7fa; text-decoration: none; transition: all 0.3s ease; font-size: 16px; font-weight: 500; }
+.menu a:hover { background: rgba(0, 230, 204, 0.15); color: #00e6cc; }
+.menu.active { display: block; }
+
+/* Deployed bots container */
+#deployedBotsContainer { margin-top: 16px; display:flex; flex-direction:column; gap:12px; }
+#deployedBotsContainer div { background: rgba(5,18,30,0.7); padding:12px; border-radius:12px; font-size:1rem; color:#c3e8ef; }
+#deployedBotsContainer a { color:#00e6cc; text-decoration:none; font-weight:600; }
+#deployedBotsContainer a:hover { color:#00b3ff; }
 </style>
 </head>
 <body>
 <div class="container">
   <button class="menu-toggle" id="menuToggle">
-    <span></span>
-    <span></span>
-    <span></span>
+    <span></span><span></span><span></span>
   </button>
-
   <div class="menu" id="menu">
     <a href="dashboard.html">⚙️ Dashboard</a>
   </div>
@@ -208,6 +172,10 @@ button:active { transform: translateY(0); }
   </div>
 
   <pre id="logs">Logs will appear here...</pre>
+
+  <!-- Deployed bots will appear here -->
+  <div id="deployedBotsContainer"></div>
+
   <div class="cta-buttons" id="ctaButtons">
     <a href="dashboard.html">⚙️ Manage Bots</a>
     <button id="viewLogsBtn">📄 View Logs</button>
@@ -262,6 +230,7 @@ document.getElementById("deployBtn").addEventListener("click", async () => {
   const sessionId = document.getElementById("sessionId").value.trim();
   const logsEl = document.getElementById("logs");
   const ctaButtons = document.getElementById("ctaButtons");
+  const deployedContainer = document.getElementById("deployedBotsContainer");
 
   if(!username || !appName || !sessionId) { logsEl.textContent = "⚠️ Fill all fields."; return; }
 
@@ -277,7 +246,6 @@ document.getElementById("deployBtn").addEventListener("click", async () => {
   const evtSource = new EventSource(url);
 
   evtSource.onmessage = (event) => {
-    // Split lines to highlight errors/warnings
     const lines = event.data.split("\n");
     lines.forEach(line => {
       if(line.startsWith("❌")) deploymentLogs += `%c${line}\n`;
@@ -285,12 +253,22 @@ document.getElementById("deployBtn").addEventListener("click", async () => {
       else deploymentLogs += line + "\n";
     });
 
-    // Simple display with color
     logsEl.innerHTML = event.data
       .replace(/^❌(.*)$/gm, '<span class="log-error">❌$1</span>')
       .replace(/^⚠️(.*)$/gm, '<span class="log-warning">⚠️$1</span>');
 
     logsEl.scrollTop = logsEl.scrollHeight;
+
+    if(event.data.includes("Deployment succeeded")) {
+      // Show deployed bot immediately
+      const botDiv = document.createElement("div");
+      botDiv.innerHTML = `
+        <strong>🚀 Deployed Bot:</strong><br>
+        Name: <strong>${appName}</strong><br>
+        URL: <a href="https://${appName}.herokuapp.com" target="_blank">https://${appName}.herokuapp.com</a>
+      `;
+      deployedContainer.appendChild(botDiv);
+    }
 
     if(event.data.includes("Deployment succeeded") || event.data.includes("Deployment failed")) {
       evtSource.close();
