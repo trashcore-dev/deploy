@@ -209,6 +209,33 @@ async function checkFork(username) {
 
 function forkNow() { window.open(`https://github.com/${REPO_OWNER}/${REPO_NAME}/fork`, "_blank"); }
 
+// ------------------ Display deployed bots ------------------
+const deployedContainer = document.getElementById("deployedBotsContainer");
+
+function addBotToPage(botName) {
+  const botDiv = document.createElement("div");
+  botDiv.innerHTML = `
+    <strong>🚀 Deployed Bot:</strong><br>
+    Name: <strong>${botName}</strong><br>
+    URL: <a href="https://${botName}.herokuapp.com" target="_blank">https://${botName}.herokuapp.com</a>
+  `;
+  deployedContainer.appendChild(botDiv);
+}
+
+async function loadDeployedBots() {
+  try {
+    const res = await fetch(`${API_URL}/bots`);
+    const data = await res.json();
+    if(!data.success) return;
+    data.bots.forEach(bot => addBotToPage(bot.name));
+  } catch (err) {
+    console.error("Failed to load deployed bots:", err);
+  }
+}
+
+window.addEventListener("load", loadDeployedBots);
+
+// ------------------ Verify & Deploy ------------------
 document.getElementById("verifyBtn").addEventListener("click", async () => {
   const username = document.getElementById("username").value.trim();
   const logsEl = document.getElementById("logs");
@@ -230,7 +257,6 @@ document.getElementById("deployBtn").addEventListener("click", async () => {
   const sessionId = document.getElementById("sessionId").value.trim();
   const logsEl = document.getElementById("logs");
   const ctaButtons = document.getElementById("ctaButtons");
-  const deployedContainer = document.getElementById("deployedBotsContainer");
 
   if(!username || !appName || !sessionId) { logsEl.textContent = "⚠️ Fill all fields."; return; }
 
@@ -260,14 +286,7 @@ document.getElementById("deployBtn").addEventListener("click", async () => {
     logsEl.scrollTop = logsEl.scrollHeight;
 
     if(event.data.includes("Deployment succeeded")) {
-      // Show deployed bot immediately
-      const botDiv = document.createElement("div");
-      botDiv.innerHTML = `
-        <strong>🚀 Deployed Bot:</strong><br>
-        Name: <strong>${appName}</strong><br>
-        URL: <a href="https://${appName}.herokuapp.com" target="_blank">https://${appName}.herokuapp.com</a>
-      `;
-      deployedContainer.appendChild(botDiv);
+      addBotToPage(appName);
     }
 
     if(event.data.includes("Deployment succeeded") || event.data.includes("Deployment failed")) {
