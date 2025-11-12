@@ -1,167 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bot Deployment Dashboard</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #0d1117;
-      color: #c9d1d9;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      color: #58a6ff;
-    }
-    #bots {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    .bot {
-      background-color: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 10px;
-      padding: 15px;
-      width: 300px;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-    }
-    .bot h3 {
-      margin-top: 0;
-      color: #58a6ff;
-    }
-    .bot p {
-      margin: 5px 0;
-      color: #8b949e;
-      font-size: 14px;
-    }
-    .bot a {
-      color: #3fb950;
-      text-decoration: none;
-    }
-    .actions button {
-      margin: 5px 3px;
-      padding: 6px 10px;
-      background-color: #238636;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      color: white;
-    }
-    .actions button.delete {
-      background-color: #da3633;
-    }
-    .actions button.restart {
-      background-color: #8957e5;
-    }
-    .refresh-btn {
-      display: block;
-      margin: 20px auto;
-      background-color: #1f6feb;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 15px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .refresh-btn:hover {
-      background-color: #388bfd;
-    }
-    .count {
-      text-align: center;
-      color: #8b949e;
-      margin-top: 10px;
-    }
-    .status {
-      font-weight: bold;
-      color: #3fb950;
-    }
-    .deleted {
-      color: #da3633;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bot Deployment Dashboard</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #0d1117;
+    color: #c9d1d9;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 { text-align: center; color: #58a6ff; }
+  #bots { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 20px; }
+  .bot {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 15px;
+    width: 300px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  }
+  .bot h3 { margin-top: 0; color: #58a6ff; word-break: break-word; }
+  .bot p { margin: 5px 0; color: #8b949e; font-size: 14px; word-break: break-word; }
+  .bot a { color: #3fb950; text-decoration: none; word-break: break-word; }
+  .actions button { margin: 5px 3px; padding: 6px 10px; border: none; border-radius: 5px; cursor: pointer; color: white; }
+  .actions button.delete { background-color: #da3633; }
+  .actions button.restart { background-color: #238636; }
+  .refresh-btn { display: block; margin: 20px auto; background-color: #1f6feb; color: white; border: none; padding: 10px 20px; font-size: 15px; border-radius: 5px; cursor: pointer; }
+  .refresh-btn:hover { background-color: #388bfd; }
+  .count { text-align: center; color: #8b949e; margin-top: 10px; }
+  .status { font-weight: bold; color: #3fb950; }
+  .deleted { color: #da3633; }
+</style>
 </head>
 <body>
-  <h1>🤖 Bot Deployment Dashboard</h1>
-  <button class="refresh-btn" onclick="loadBots()">🔄 Refresh Bots</button>
-  <p class="count" id="botCount">Loading...</p>
-  <div id="bots"></div>
+<h1>🤖 Bot Deployment Dashboard</h1>
+<button class="refresh-btn" onclick="refreshBots()">🔄 Refresh Bots</button>
+<p class="count" id="botCount">Loading...</p>
+<div id="bots"></div>
 
-  <script>
-    async function loadBots() {
-      const botsContainer = document.getElementById("bots");
-      const botCount = document.getElementById("botCount");
+<script>
+let allBots = [];
+let loadedCount = 0;
+const BATCH_SIZE = 20; // Number of bots to load per scroll
 
-      botsContainer.innerHTML = "<p>Loading bots...</p>";
-      try {
-        const res = await fetch("/bots");
-        const data = await res.json();
+async function fetchBots() {
+  try {
+    const res = await fetch("/bots");
+    const data = await res.json();
+    if (!data.success) throw new Error("Failed to load bots");
+    allBots = data.bots;
+    loadedCount = 0;
+    document.getElementById("botCount").textContent = `Total Bots: ${allBots.length}`;
+    document.getElementById("bots").innerHTML = "";
+    loadMoreBots();
+  } catch (err) {
+    console.error(err);
+    document.getElementById("bots").innerHTML = "<p>❌ Failed to load bots.</p>";
+    document.getElementById("botCount").textContent = "Error loading bots.";
+  }
+}
 
-        if (!data.success) throw new Error("Failed to load bots");
+function createBotElement(bot) {
+  const div = document.createElement("div");
+  div.className = "bot";
+  div.innerHTML = `
+    <h3>${bot.name}</h3>
+    <p>🌐 URL: <a href="${bot.url}" target="_blank">${bot.url}</a></p>
+    <p>🔑 Session ID: ${bot.sessionId || '—'}</p>
+    <p>📆 Deployed: ${bot.date ? new Date(bot.date).toLocaleString() : '—'}</p>
+    <p>Status: <span class="status ${bot.status === "deleted" ? "deleted" : ""}">${bot.status}</span></p>
+    <div class="actions">
+      <button class="restart" onclick="restartBot('${bot.name}')">🔁 Restart</button>
+      <button class="delete" onclick="deleteBot('${bot.name}')">🗑 Delete</button>
+    </div>
+  `;
+  return div;
+}
 
-        botsContainer.innerHTML = "";
-        botCount.textContent = `Total Bots: ${data.count}`;
+function loadMoreBots() {
+  const container = document.getElementById("bots");
+  const nextBatch = allBots.slice(loadedCount, loadedCount + BATCH_SIZE);
+  nextBatch.forEach(bot => container.appendChild(createBotElement(bot)));
+  loadedCount += nextBatch.length;
+}
 
-        if (data.count === 0) {
-          botsContainer.innerHTML = "<p>No bots deployed yet.</p>";
-          return;
-        }
+// Infinite scroll
+window.addEventListener("scroll", () => {
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+    if (loadedCount < allBots.length) loadMoreBots();
+  }
+});
 
-        data.bots.forEach(bot => {
-          const div = document.createElement("div");
-          div.className = "bot";
+async function restartBot(appName) {
+  if (!confirm(`Restart dynos for ${appName}?`)) return;
+  try {
+    const res = await fetch(`/restart/${appName}`, { method: "POST" });
+    const data = await res.json();
+    alert(data.message);
+  } catch (err) {
+    alert("❌ Failed to restart bot");
+  }
+}
 
-          div.innerHTML = `
-            <h3>${bot.name}</h3>
-            <p>🌐 URL: <a href="${bot.url}" target="_blank">${bot.url}</a></p>
-            <p>📆 Created: ${new Date(bot.created_at).toLocaleString()}</p>
-            <p>🗺️ Region: ${bot.region}</p>
-            <p>⚙️ Stack: ${bot.stack}</p>
-            <p>Status: <span class="status ${bot.status === "deleted" ? "deleted" : ""}">${bot.status}</span></p>
-            <div class="actions">
-              <button class="restart" onclick="restartBot('${bot.name}')">🔁 Restart</button>
-              <button class="delete" onclick="deleteBot('${bot.name}')">🗑 Delete</button>
-            </div>
-          `;
-          botsContainer.appendChild(div);
-        });
-      } catch (err) {
-        console.error(err);
-        botsContainer.innerHTML = "<p>❌ Failed to load bots.</p>";
-        botCount.textContent = "Error loading bots.";
-      }
-    }
+async function deleteBot(appName) {
+  if (!confirm(`Are you sure you want to delete ${appName}?`)) return;
+  try {
+    const res = await fetch(`/delete/${appName}`, { method: "DELETE" });
+    const data = await res.json();
+    alert(data.message);
+    refreshBots();
+  } catch (err) {
+    alert("❌ Failed to delete bot");
+  }
+}
 
-    async function restartBot(appName) {
-      if (!confirm(`Restart dynos for ${appName}?`)) return;
-      try {
-        const res = await fetch(`/restart/${appName}`, { method: "POST" });
-        const data = await res.json();
-        alert(data.message);
-      } catch (err) {
-        alert("❌ Failed to restart bot");
-      }
-    }
+function refreshBots() {
+  allBots = [];
+  loadedCount = 0;
+  fetchBots();
+}
 
-    async function deleteBot(appName) {
-      if (!confirm(`Are you sure you want to delete ${appName}?`)) return;
-      try {
-        const res = await fetch(`/delete/${appName}`, { method: "DELETE" });
-        const data = await res.json();
-        alert(data.message);
-        loadBots();
-      } catch (err) {
-        alert("❌ Failed to delete bot");
-      }
-    }
-
-    loadBots();
-  </script>
+fetchBots();
+</script>
 </body>
 </html>
