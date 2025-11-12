@@ -227,10 +227,21 @@
       });
     }
 
+    // --- FETCH APP INFO FROM API ---
+    async function fetchAppInfo(appName) {
+      try {
+        const res = await fetch(`${API_URL}/apps/${appName}`); // Create a route in your backend to return app info including created_at
+        const data = await res.json();
+        return data;
+      } catch {
+        return null;
+      }
+    }
+
     // --- LIVE UPTIME FUNCTION ---
-    function startUptimeTimer(uptimeElement, startTime) {
+    function startUptimeTimer(uptimeElement, createdAt) {
       function update() {
-        const diff = Date.now() - startTime;
+        const diff = Date.now() - new Date(createdAt).getTime();
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff / (1000 * 60)) % 60);
         const seconds = Math.floor((diff / 1000) % 60);
