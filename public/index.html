@@ -94,7 +94,6 @@
     const API_URL = "https://render-deploy-7mol.onrender.com";
     const REPO_OWNER = "Tennor-modz";
     const REPO_NAME = "trashcore-ultra";
-    let deploymentLogs = "";
 
     // --- LOCAL STORAGE HANDLERS ---
     function saveDeployedBot(bot) {
@@ -113,19 +112,33 @@
         card.innerHTML = `
           <strong>App Name:</strong> ${bot.name}<br>
           <strong>Status:</strong> 🟢 Active<br>
-          <strong>Uptime:</strong> ${bot.uptime}<br>
+          <strong>Uptime:</strong> <span class="uptime">00h 00m 00s</span><br>
           <strong>Date:</strong> ${bot.date}<br>
           <strong>Link:</strong> <a href="${bot.url}" target="_blank">${bot.url}</a>
         `;
         container.appendChild(card);
+        startUptimeTimer(card.querySelector(".uptime"), bot.startTime);
       });
+    }
+
+    // --- LIVE UPTIME FUNCTION ---
+    function startUptimeTimer(uptimeElement, startTime) {
+      function update() {
+        const diff = Date.now() - startTime;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+        uptimeElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
+      }
+      update();
+      setInterval(update, 1000);
     }
 
     loadDeployedBots();
 
     // --- VERIFY FORK ---
     async function checkFork(username) {
-      if(username === REPO_OWNER) return true;
+      if (username === REPO_OWNER) return true;
       try {
         const res = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}`);
         return res.ok;
@@ -135,7 +148,7 @@
     document.getElementById("verifyBtn").addEventListener("click", async () => {
       const username = document.getElementById("username").value.trim();
       const logsEl = document.getElementById("logs");
-      if(!username) return logsEl.textContent = "⚠️ Enter GitHub username first.";
+      if (!username) return logsEl.textContent = "⚠️ Enter GitHub username first.";
       logsEl.textContent = "⏳ Verifying fork...";
       const hasFork = await checkFork(username);
       logsEl.textContent = hasFork ? "✅ Verified! You can now deploy." : "❌ Fork required.";
@@ -149,7 +162,7 @@
       const logsEl = document.getElementById("logs");
       const container = document.getElementById("deployedBotsContainer");
 
-      if(!username || !appName || !sessionId)
+      if (!username || !appName || !sessionId)
         return logsEl.textContent = "⚠️ Fill all fields.";
 
       logsEl.textContent = "✅ Verified. Starting deployment...\n";
@@ -161,7 +174,6 @@
         logsEl.textContent += event.data + "\n";
         logsEl.scrollTop = logsEl.scrollHeight;
 
-        // ✅ FIXED SUCCESS DETECTION (works with your backend messages)
         if (
           event.data.includes("💾 Bot saved locally. Deployment complete") ||
           event.data.includes("✅ Build succeeded") ||
@@ -171,7 +183,7 @@
           const botInfo = {
             name: appName,
             url: `https://${appName}.herokuapp.com`,
-            uptime: "00h 00m (just deployed)",
+            startTime: Date.now(),
             date: new Date().toLocaleString()
           };
 
@@ -180,11 +192,12 @@
           card.innerHTML = `
             <strong>App Name:</strong> ${botInfo.name}<br>
             <strong>Status:</strong> 🟢 Active<br>
-            <strong>Uptime:</strong> ${botInfo.uptime}<br>
+            <strong>Uptime:</strong> <span class="uptime">00h 00m 00s</span><br>
             <strong>Date:</strong> ${botInfo.date}<br>
             <strong>Link:</strong> <a href="${botInfo.url}" target="_blank">${botInfo.url}</a>
           `;
-          container.prepend(card); // 👈 Appears right under logs
+          container.prepend(card);
+          startUptimeTimer(card.querySelector(".uptime"), botInfo.startTime);
           saveDeployedBot(botInfo);
           evtSource.close();
         }
