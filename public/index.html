@@ -6,7 +6,6 @@
 <title>Trash Bot Deployer</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* --- existing CSS (unchanged core styles) --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: "Poppins", sans-serif;
@@ -48,7 +47,6 @@ h1 {
 }
 input, button {
   padding: 14px 16px;
-  margin: 0;
   border-radius: 12px;
   border: 2px solid rgba(0, 200, 255, 0.25);
   width: 100%;
@@ -58,12 +56,6 @@ input, button {
   transition: all 0.3s ease;
   outline: none;
   font-family: inherit;
-}
-input::placeholder { color: #6ab0b9; }
-input:focus {
-  border-color: #00e6cc;
-  box-shadow: 0 0 0 3px rgba(0, 230, 204, 0.25);
-  background: rgba(10, 25, 47, 0.9);
 }
 button {
   background: linear-gradient(90deg, #00e6cc, #00b3ff);
@@ -75,8 +67,6 @@ button {
   transition: all 0.3s ease;
 }
 button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 180, 255, 0.5); }
-button:active { transform: translateY(0); }
-
 #logs {
   margin-top: 8px;
   padding: 16px;
@@ -89,62 +79,31 @@ button:active { transform: translateY(0); }
   font-size: 0.95rem;
   text-align: left;
   white-space: pre-wrap;
-  font-family: "Fira Code", "Courier New", monospace;
+  font-family: "Fira Code", monospace;
   color: #c3e8ef;
   border: 1px solid rgba(0, 200, 255, 0.1);
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 .log-error { color: #ff5555; font-weight: 600; }
 .log-warning { color: #ffa500; font-weight: 600; }
-
-.cta-buttons { display: none; gap: 12px; margin-top: 16px; }
-.cta-buttons a, .cta-buttons button {
-  padding: 10px 18px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  text-decoration: none;
-  color: #fff;
-  background: linear-gradient(90deg, #00e6cc, #00b3ff);
-  transition: 0.3s;
-}
-.cta-buttons a:hover, .cta-buttons button:hover {
-  background: linear-gradient(90deg, #00b3ff, #00e6cc);
-}
-
-#deployedBotsContainer {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
+#deployedBotsContainer { margin-top: 16px; display:flex; flex-direction:column; gap:12px; width:100%; }
 .bot-card {
   background: rgba(5,18,30,0.8);
-  border: 1px solid rgba(0, 200, 255, 0.1);
-  padding: 14px;
   border-radius: 12px;
-  text-align: left;
+  padding: 12px;
   font-size: 0.95rem;
-  line-height: 1.6;
-  box-shadow: inset 0 0 0 1px rgba(0,200,255,0.1);
+  text-align: left;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  border: 1px solid rgba(0, 200, 255, 0.1);
 }
 .bot-card strong { color: #00e6cc; }
-.bot-status {
-  display: inline-block;
-  margin-left: 6px;
-  font-weight: 600;
-}
-.status-active { color: #00ff88; }
-.status-offline { color: #ff4444; }
-.bot-link { color: #00b3ff; text-decoration: none; font-weight: 600; }
-.bot-link:hover { color: #00e6cc; }
+.bot-card a { color:#00b3ff; text-decoration:none; font-weight:600; }
+.bot-card a:hover { color:#00e6cc; }
 </style>
 </head>
 <body>
 <div class="container">
   <h1>🚀 Trash Bot Deployer</h1>
-
   <div class="card">
     <input type="text" id="username" placeholder="GitHub Username" required>
     <button type="button" id="verifyBtn">🔍 Verify Username</button>
@@ -152,9 +111,7 @@ button:active { transform: translateY(0); }
     <input type="text" id="sessionId" placeholder="Session ID / Auth Key" required>
     <button id="deployBtn">⚡ Deploy Bot</button>
   </div>
-
   <pre id="logs">Logs will appear here...</pre>
-
   <div id="deployedBotsContainer"></div>
 </div>
 
@@ -162,103 +119,102 @@ button:active { transform: translateY(0); }
 const API_URL = "https://render-deploy-7mol.onrender.com";
 const REPO_OWNER = "Tennor-modz";
 const REPO_NAME = "trashcore-ultra";
+let deploymentLogs = "";
+
+function saveDeployedBot(bot) {
+  let bots = JSON.parse(localStorage.getItem("deployedBots") || "[]");
+  bots.push(bot);
+  localStorage.setItem("deployedBots", JSON.stringify(bots));
+}
+
+function loadDeployedBots() {
+  const bots = JSON.parse(localStorage.getItem("deployedBots") || "[]");
+  const container = document.getElementById("deployedBotsContainer");
+  container.innerHTML = "";
+  bots.forEach(bot => {
+    const card = document.createElement("div");
+    card.className = "bot-card";
+    card.innerHTML = `
+      <strong>App Name:</strong> ${bot.name}<br>
+      <strong>Status:</strong> 🟢 Active<br>
+      <strong>Uptime:</strong> ${bot.uptime}<br>
+      <strong>Date:</strong> ${bot.date}<br>
+      <strong>Link:</strong> <a href="${bot.url}" target="_blank">${bot.url}</a>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// Load bots when page opens
+loadDeployedBots();
 
 async function checkFork(username) {
-  if (username === REPO_OWNER) return true;
+  if(username === REPO_OWNER) return true;
   try {
     const res = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}`);
-    if (!res.ok) return false;
-    const repo = await res.json();
-    return repo.fork === true;
-  } catch {
-    return false;
-  }
+    return res.ok;
+  } catch { return false; }
 }
 
 document.getElementById("verifyBtn").addEventListener("click", async () => {
   const username = document.getElementById("username").value.trim();
-  const logs = document.getElementById("logs");
-  if (!username) return (logs.textContent = "⚠️ Enter GitHub username first.");
-  logs.textContent = "⏳ Verifying fork...";
-  const ok = await checkFork(username);
-  logs.textContent = ok
-    ? "✅ Verified! You can now deploy."
-    : `❌ You must fork ${REPO_OWNER}/${REPO_NAME} first.`;
+  const logsEl = document.getElementById("logs");
+  if(!username) return logsEl.textContent = "⚠️ Enter GitHub username first.";
+  logsEl.textContent = "⏳ Verifying fork...";
+  const hasFork = await checkFork(username);
+  logsEl.textContent = hasFork ? "✅ Verified! You can now deploy." : "❌ Fork required.";
 });
 
 document.getElementById("deployBtn").addEventListener("click", async () => {
   const username = document.getElementById("username").value.trim();
   const appName = document.getElementById("appName").value.trim();
   const sessionId = document.getElementById("sessionId").value.trim();
-  const logs = document.getElementById("logs");
-  if (!username || !appName || !sessionId)
-    return (logs.textContent = "⚠️ Fill all fields.");
+  const logsEl = document.getElementById("logs");
+  const container = document.getElementById("deployedBotsContainer");
 
-  logs.textContent = "⏳ Starting deployment...";
-  const hasFork = await checkFork(username);
-  if (!hasFork && username !== REPO_OWNER)
-    return (logs.textContent = "❌ Fork required.");
+  if(!username || !appName || !sessionId) return logsEl.textContent = "⚠️ Fill all fields.";
 
-  const tarball = `https://github.com/${username}/${REPO_NAME}/archive/refs/heads/main.tar.gz`;
-  const sse = new EventSource(
-    `${API_URL}/deploy/${appName}/logs?repo=${encodeURIComponent(
-      tarball
-    )}&sessionId=${encodeURIComponent(sessionId)}`
-  );
-  sse.onmessage = (e) => {
-    logs.textContent += "\n" + e.data;
-    logs.scrollTop = logs.scrollHeight;
-    if (e.data.includes("Deployment succeeded")) {
-      sse.close();
-      loadBots(); // refresh bots list
+  logsEl.textContent = "✅ Verified. Starting deployment...\n";
+  const tarballUrl = `https://github.com/${username}/${REPO_NAME}/archive/refs/heads/main.tar.gz`;
+  const url = `${API_URL}/deploy/${appName}/logs?repo=${encodeURIComponent(tarballUrl)}&sessionId=${encodeURIComponent(sessionId)}`;
+  const evtSource = new EventSource(url);
+
+  evtSource.onmessage = (event) => {
+    logsEl.textContent += event.data + "\n";
+    logsEl.scrollTop = logsEl.scrollHeight;
+
+    if (event.data.includes("Deployment succeeded")) {
+      const botInfo = {
+        name: appName,
+        url: `https://${appName}.herokuapp.com`,
+        uptime: "00h 00m (just deployed)",
+        date: new Date().toLocaleString()
+      };
+
+      // Display immediately
+      const card = document.createElement("div");
+      card.className = "bot-card";
+      card.innerHTML = `
+        <strong>App Name:</strong> ${botInfo.name}<br>
+        <strong>Status:</strong> 🟢 Active<br>
+        <strong>Uptime:</strong> ${botInfo.uptime}<br>
+        <strong>Date:</strong> ${botInfo.date}<br>
+        <strong>Link:</strong> <a href="${botInfo.url}" target="_blank">${botInfo.url}</a>
+      `;
+      container.appendChild(card);
+
+      // Save in localStorage
+      saveDeployedBot(botInfo);
+
+      evtSource.close();
     }
   };
+
+  evtSource.onerror = () => {
+    logsEl.textContent += "⚠️ Deployment connection closed.\n";
+    evtSource.close();
+  };
 });
-
-// 🧩 Fetch bots and show status, uptime, etc.
-async function loadBots() {
-  const container = document.getElementById("deployedBotsContainer");
-  container.innerHTML = "<em>⏳ Loading deployed bots...</em>";
-
-  try {
-    const res = await fetch(`${API_URL}/bots`);
-    const data = await res.json();
-
-    if (data.success && data.bots.length) {
-      container.innerHTML = "";
-      data.bots.forEach((bot) => {
-        // fallback values in case backend misses them
-        const status =
-          bot.status && bot.status.toLowerCase() === "active"
-            ? "🟢 Active"
-            : "🔴 Offline";
-        const uptime = bot.uptime || "Unknown";
-        const date = bot.date || "N/A";
-        const link = bot.url || bot.heroku_link || "#";
-
-        const card = document.createElement("div");
-        card.classList.add("bot-card");
-        card.innerHTML = `
-          <div><strong>🤖 App name:</strong> ${bot.name || "Unnamed"}</div>
-          <div><strong>Status:</strong> <span class="bot-status ${
-            status.includes("🟢") ? "status-active" : "status-offline"
-          }">${status}</span></div>
-          <div><strong>Uptime:</strong> ${uptime}</div>
-          <div><strong>Date:</strong> ${date}</div>
-          <div><strong>Heroku link:</strong> <a href="${link}" target="_blank" class="bot-link">${link}</a></div>
-        `;
-        container.appendChild(card);
-      });
-    } else {
-      container.innerHTML = "<em>No bots deployed yet.</em>";
-    }
-  } catch (err) {
-    container.innerHTML =
-      "<span class='log-error'>❌ Failed to load bots list.</span>";
-  }
-}
-
-window.addEventListener("load", loadBots);
 </script>
 </body>
 </html>
