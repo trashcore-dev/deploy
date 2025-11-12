@@ -86,7 +86,13 @@ button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 180, 
 }
 .log-error { color: #ff5555; font-weight: 600; }
 .log-warning { color: #ffa500; font-weight: 600; }
-#deployedBotsContainer { margin-top: 16px; display:flex; flex-direction:column; gap:12px; width:100%; }
+#deployedBotsContainer {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
 .bot-card {
   background: rgba(5,18,30,0.8);
   border-radius: 12px;
@@ -112,6 +118,8 @@ button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 180, 
     <button id="deployBtn">⚡ Deploy Bot</button>
   </div>
   <pre id="logs">Logs will appear here...</pre>
+
+  <!-- ✅ Moved container directly under logs -->
   <div id="deployedBotsContainer"></div>
 </div>
 
@@ -145,7 +153,6 @@ function loadDeployedBots() {
   });
 }
 
-// Load bots when page opens
 loadDeployedBots();
 
 async function checkFork(username) {
@@ -191,7 +198,6 @@ document.getElementById("deployBtn").addEventListener("click", async () => {
         date: new Date().toLocaleString()
       };
 
-      // Display immediately
       const card = document.createElement("div");
       card.className = "bot-card";
       card.innerHTML = `
@@ -201,11 +207,9 @@ document.getElementById("deployBtn").addEventListener("click", async () => {
         <strong>Date:</strong> ${botInfo.date}<br>
         <strong>Link:</strong> <a href="${botInfo.url}" target="_blank">${botInfo.url}</a>
       `;
-      container.appendChild(card);
+      container.prepend(card); // 👈 Added here under logs
 
-      // Save in localStorage
       saveDeployedBot(botInfo);
-
       evtSource.close();
     }
   };
