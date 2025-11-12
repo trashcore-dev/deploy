@@ -18,6 +18,7 @@
       --button-primary: #4c6ef5;
       --button-success: #48bb78;
       --button-warning: #ed8936;
+      --button-danger: #f56565;
     }
     
     body {
@@ -94,6 +95,14 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
     }
+    #deleteBtn {
+      background: linear-gradient(135deg, var(--button-danger), #e53e3e);
+    }
+    #deleteBtn:hover {
+      background: linear-gradient(135deg, #e53e3e, #c53030);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
     #logBox {
       margin-top: 20px;
       background: linear-gradient(135deg, var(--bg-secondary), #1a2230);
@@ -120,7 +129,7 @@
   </style>
 </head>
 <body>
-  <h1>⚙️ Manage Bot</h1>
+  <h1>⚙️APP MANAGER</h1>
   <div class="container">
     <p><strong>App Name:</strong> <span id="appName">Loading...</span></p>
     <label for="sessionInput">Session ID:</label>
@@ -128,9 +137,11 @@
 
     <button id="saveBtn">💾 Update Session ID</button>
     <button id="restartBtn">🔁 Restart Bot</button>
+    <button id="deleteBtn">Delete Bot</button>
 
     <div id="logBox">📜 Logs will appear here...</div>
   </div>
+
   <script>
     const API_URL = "https://render-deploy-7mol.onrender.com"; // Your backend
 
@@ -143,6 +154,7 @@
     const logBox = document.getElementById("logBox");
     const saveBtn = document.getElementById("saveBtn");
     const restartBtn = document.getElementById("restartBtn");
+    const deleteBtn = document.getElementById("deleteBtn");
 
     // Load saved session from localStorage (optional)
     const savedSessions = JSON.parse(localStorage.getItem("botSessions") || "{}");
@@ -163,7 +175,6 @@
         const data = await res.json();
         logBox.textContent += `✅ ${data.message}\n`;
 
-        // Save to localStorage for persistence
         savedSessions[appName] = sessionId;
         localStorage.setItem("botSessions", JSON.stringify(savedSessions));
       } catch (err) {
@@ -182,6 +193,29 @@
       } catch (err) {
         console.error(err);
         logBox.textContent += `❌ Failed to restart bot.\n`;
+      }
+    });
+
+    // --- Delete Bot ---
+    deleteBtn.addEventListener("click", async () => {
+      if (!confirm(`Are you sure you want to delete ${appName}?`)) return;
+
+      logBox.textContent += `\n🗑 Deleting bot...\n`;
+      try {
+        const res = await fetch(`${API_URL}/delete/${appName}`, { method: "DELETE" });
+        const data = await res.json();
+        logBox.textContent += `✅ ${data.message}\n`;
+
+        // Remove from localStorage
+        let allBots = JSON.parse(localStorage.getItem("deployedBots") || "[]");
+        allBots = allBots.filter(b => b.name !== appName);
+        localStorage.setItem("deployedBots", JSON.stringify(allBots));
+
+        // Redirect to dashboard
+        window.location.href = "index.html";
+      } catch (err) {
+        console.error(err);
+        logBox.textContent += `❌ Failed to delete bot.\n`;
       }
     });
   </script>
