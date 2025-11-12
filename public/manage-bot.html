@@ -5,62 +5,127 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>⚙️ Manage Bot</title>
   <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #1a1f2d;
+      --bg-card: #121826;
+      --border-color: #2d3748;
+      --text-primary: #e2e8f0;
+      --text-secondary: #a0aec0;
+      --accent-blue: #4c6ef5;
+      --accent-green: #48bb78;
+      --accent-red: #e53e3e;
+      --accent-yellow: #ecc94b;
+      --button-primary: #4c6ef5;
+      --button-success: #48bb78;
+      --button-warning: #ed8936;
+      --button-danger: #f56565;
+    }
+    
     body {
-      background-color: #0d1117;
-      color: #c9d1d9;
-      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, var(--bg-primary), #161b29);
+      color: var(--text-primary);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       padding: 20px;
+      min-height: 100vh;
     }
     h1 {
-      color: #58a6ff;
+      color: var(--accent-blue);
       text-align: center;
+      font-size: 2.2rem;
+      margin-bottom: 30px;
+      text-shadow: 0 0 10px rgba(76, 110, 245, 0.3);
     }
     .container {
-      max-width: 450px;
+      max-width: 500px;
       margin: 0 auto;
-      background-color: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+      background: linear-gradient(135deg, var(--bg-card), #1a2230);
+      border: 1px solid var(--border-color);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
     }
     label {
       display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-secondary);
     }
     input {
       width: 100%;
-      padding: 8px;
-      border-radius: 5px;
-      border: 1px solid #30363d;
-      background-color: #0d1117;
-      color: #c9d1d9;
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
       margin-bottom: 15px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(76, 110, 245, 0.2);
     }
     button {
       width: 100%;
-      background-color: #238636;
       color: white;
       border: none;
-      padding: 10px;
-      border-radius: 5px;
+      padding: 12px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
-      margin-bottom: 10px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    button:hover {
-      background-color: #2ea043;
+    #saveBtn {
+      background: linear-gradient(135deg, var(--button-success), #38a169);
+    }
+    #saveBtn:hover {
+      background: linear-gradient(135deg, #38a169, #2f855a);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+    #restartBtn {
+      background: linear-gradient(135deg, var(--button-warning), #dd6b20);
+    }
+    #restartBtn:hover {
+      background: linear-gradient(135deg, #dd6b20, #c05621);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+    #deleteBtn {
+      background: linear-gradient(135deg, var(--button-danger), #e53e3e);
+    }
+    #deleteBtn:hover {
+      background: linear-gradient(135deg, #e53e3e, #c53030);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
     }
     #logBox {
       margin-top: 20px;
-      background-color: #0d1117;
-      border: 1px solid #30363d;
-      border-radius: 8px;
-      padding: 10px;
-      height: 200px;
+      background: linear-gradient(135deg, var(--bg-secondary), #1a2230);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 15px;
+      height: 250px;
       overflow-y: auto;
       white-space: pre-wrap;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+    p {
+      margin: 0 0 15px 0;
+      padding: 10px;
+      background-color: rgba(76, 110, 245, 0.1);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent-blue);
+    }
+    strong {
+      color: var(--text-secondary);
     }
   </style>
 </head>
@@ -110,6 +175,7 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ sessionId })
         });
+        if (!res.ok) throw new Error("Failed to update session ID");
         const data = await res.json();
         logBox.textContent += `✅ ${data.message}\n`;
 
@@ -117,7 +183,7 @@
         localStorage.setItem("botSessions", JSON.stringify(savedSessions));
       } catch (err) {
         console.error(err);
-        logBox.textContent += `❌ Failed to update session ID.\n`;
+        logBox.textContent += `❌ Failed to update session ID: ${err.message}\n`;
       }
     });
 
@@ -126,11 +192,12 @@
       logBox.textContent += `\n🔁 Restarting bot dynos...\n`;
       try {
         const res = await fetch(`${API_URL}/restart/${appName}`, { method: "POST" });
+        if (!res.ok) throw new Error("Failed to restart dynos");
         const data = await res.json();
         logBox.textContent += `✅ ${data.message}\n`;
       } catch (err) {
         console.error(err);
-        logBox.textContent += `❌ Failed to restart bot.\n`;
+        logBox.textContent += `❌ Failed to restart bot: ${err.message}\n`;
       }
     });
 
@@ -141,6 +208,7 @@
       logBox.textContent += `\n🗑 Deleting bot...\n`;
       try {
         const res = await fetch(`${API_URL}/delete/${appName}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed to delete bot");
         const data = await res.json();
         logBox.textContent += `✅ ${data.message}\n`;
 
@@ -149,11 +217,11 @@
         allBots = allBots.filter(b => b.name !== appName);
         localStorage.setItem("deployedBots", JSON.stringify(allBots));
 
-        // Redirect back to main dashboard or clear page
-        window.location.href = "index.html"; // or any dashboard page
+        // Redirect back to main dashboard
+        window.location.href = "index.html";
       } catch (err) {
         console.error(err);
-        logBox.textContent += `❌ Failed to delete bot.\n`;
+        logBox.textContent += `❌ Failed to delete bot: ${err.message}\n`;
       }
     });
   </script>
