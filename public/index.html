@@ -153,51 +153,61 @@
       box-shadow: 0 6px 20px rgba(74, 222, 128, 0.4);
     }
 
+<style>
 .bot-card {
-  background: linear-gradient(135deg, var(--bg-card), #475569);
+  background: linear-gradient(135deg, var(--bg-card), #334155);
   border: 1px solid var(--border-color);
-  border-radius: 12px; /* smaller corners */
-  padding: 14px; /* reduced padding */
-  margin-top: 10px;
-  width: 100%;
-  max-width: 360px; /* slightly smaller card */
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+  width: 140px;       /* much smaller width */
+  height: 140px;      /* fixed height for square look */
+  padding: 8px;       /* tighter padding */
+  margin: 6px;
   display: flex;
   flex-direction: column;
-  gap: 6px; /* tighter content spacing */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(71, 85, 105, 0.6);
+  justify-content: space-between;
+  text-align: center;
+  font-size: 11px;    /* smaller text */
+  color: var(--text-primary);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
 }
 
 .bot-card:hover {
-  transform: translateY(-3px) scale(1.01);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-  border-color: var(--accent-blue);
+  transform: scale(1.05);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.3);
+}
+
+.bot-card strong {
+  display: block;
+  font-size: 11px;
+  color: var(--accent-blue);
 }
 
 .manage-btn {
-  background: linear-gradient(135deg, var(--button-secondary), #475569);
-  font-size: 13px;
-  padding: 8px 12px; /* smaller button */
-  border: 1px solid var(--border-color);
-  margin-top: 6px;
-  font-weight: 500;
+  background: var(--accent-blue);
+  border: none;
+  color: white;
+  font-size: 10px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  margin-top: 4px;
+  cursor: pointer;
+  transition: background 0.3s ease;
 }
 
 .manage-btn:hover {
-  background: linear-gradient(135deg, #475569, var(--accent-blue));
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+  background: #2563eb;
 }
 
 #deployedBotsContainer {
   display: flex;
-  flex-wrap: wrap; /* allow multiple in a row */
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
-  margin-top: 25px;
+  gap: 10px;
+  margin-top: 20px;
 }
+<style>
+
     .bot-card strong {
       color: var(--text-secondary);
       font-weight: 600;
