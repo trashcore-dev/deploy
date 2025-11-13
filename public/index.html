@@ -355,6 +355,13 @@
       font-size: 1.1rem;
     }
 
+    .next-claim-time {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 5px;
+      display: block;
+    }
+
     /* --- MOBILE RESPONSIVE --- */
     @media (max-width: 768px) {
       h1 {
@@ -471,6 +478,7 @@
       Credits: <span id="creditsCount" class="credits-count">0</span>/10
       <br>
       <a href="#" id="claimCreditsLink" style="color: var(--accent-blue); text-decoration: none; font-weight: 500;">Claim Daily Credits</a>
+      <span id="nextClaimTime" class="next-claim-time"></span>
     </div>
     
     <div class="input-container">
@@ -505,7 +513,23 @@
 
     // --- CREDITS MANAGEMENT ---
     function getCredits() {
-      const credits = JSON.parse(localStorage.getItem("credits") || '{"count": 0, "lastClaimDate": null}');
+      let credits = localStorage.getItem("credits");
+      
+      // Handle different possible formats
+      if (!credits) {
+        // Initialize with default values
+        credits = JSON.stringify({count: 0, lastClaimDate: null});
+        localStorage.setItem("credits", credits);
+      }
+      
+      try {
+        credits = JSON.parse(credits);
+      } catch (e) {
+        // If parsing fails, reset to default
+        credits = {count: 0, lastClaimDate: null};
+        localStorage.setItem("credits", JSON.stringify(credits));
+      }
+      
       const today = new Date().toDateString();
       
       // Reset credits if it's a new day
@@ -521,17 +545,70 @@
     function updateCreditsDisplay() {
       const credits = getCredits();
       document.getElementById("creditsCount").textContent = credits;
+      
+      // Update next claim time
+      updateNextClaimTime();
+    }
+
+    function updateNextClaimTime() {
+      let credits = localStorage.getItem("credits");
+      
+      // Handle different possible formats
+      if (!credits) {
+        credits = JSON.stringify({count: 0, lastClaimDate: null});
+      }
+      
+      try {
+        credits = JSON.parse(credits);
+      } catch (e) {
+        credits = {count: 0, lastClaimDate: null};
+      }
+      
+      const nextClaimTimeEl = document.getElementById("nextClaimTime");
+      const today = new Date().toDateString();
+      const now = new Date();
+      
+      if (credits.lastClaimDate === today && credits.count > 0) {
+        // User has claimed today - show when next claim is available
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0); // Reset to midnight
+        
+        const timeDiff = tomorrow - now;
+        const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        nextClaimTimeEl.textContent = `Next claim: ${hours}h ${minutes}m`;
+        nextClaimTimeEl.style.display = "block";
+      } else {
+        // User can claim now
+        nextClaimTimeEl.textContent = "Ready to claim!";
+        nextClaimTimeEl.style.display = "block";
+      }
     }
 
     // Handle credits claiming
     document.getElementById("claimCreditsLink").addEventListener("click", function(e) {
       e.preventDefault();
-      const credits = JSON.parse(localStorage.getItem("credits") || '{"count": 0, "lastClaimDate": null}');
+      let credits = localStorage.getItem("credits");
+      
+      // Handle different possible formats
+      if (!credits) {
+        credits = JSON.stringify({count: 0, lastClaimDate: null});
+      }
+      
+      try {
+        credits = JSON.parse(credits);
+      } catch (e) {
+        credits = {count: 0, lastClaimDate: null};
+      }
+      
       const today = new Date().toDateString();
       
       // Check if we can claim today
-      if (credits.lastClaimDate === today) {
+      if (credits.lastClaimDate === today && credits.count > 0) {
         alert("You've already claimed your daily credits today! Come back tomorrow.");
+        updateCreditsDisplay();
         return;
       }
       
@@ -633,7 +710,7 @@
       const credits = isRepoOwner ? 10 : getCredits(); // No credits needed if repo owner
       
       if (!isRepoOwner && credits < 10) {
-        alert("You need 10 credits to deploy a bot. Visit credits.html to claim daily credits.");
+        alert("You need 10 credits to deploy a bot. Click 'Claim Daily Credits' to get 10 credits.");
         return;
       }
 
@@ -647,7 +724,19 @@
 
       // Deduct credits only if not repo owner
       if (!isRepoOwner) {
-        const creditsData = JSON.parse(localStorage.getItem("credits") || '{"count": 0, "lastClaimDate": null}');
+        let creditsData = localStorage.getItem("credits");
+        
+        // Handle different possible formats
+        if (!creditsData) {
+          creditsData = JSON.stringify({count: 0, lastClaimDate: null});
+        }
+        
+        try {
+          creditsData = JSON.parse(creditsData);
+        } catch (e) {
+          creditsData = {count: 0, lastClaimDate: null};
+        }
+        
         creditsData.count -= 10;
         localStorage.setItem("credits", JSON.stringify(creditsData));
         updateCreditsDisplay();
@@ -736,6 +825,9 @@
     // Initialize
     updateCreditsDisplay();
     loadDeployedBots();
+    
+    // Update next claim time every minute
+    setInterval(updateNextClaimTime, 60000);
   </script>
 </body>
 </html>
