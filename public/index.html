@@ -242,7 +242,7 @@
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js';
     document.head.appendChild(script);
 
-    script.onload = function() {
+    script.onload = async function() {
         console.log("bcryptjs loaded");
 
         const registerBtn = document.getElementById('registerBtn');
@@ -303,12 +303,13 @@
                     });
                 });
 
-                // Create user object
+                // Create user object - Mark as verified upon creation
                 const newUser = {
                     email: email,
                     username: username,
                     password: hashedPassword, // Store the hashed password
-                    createdAt: new Date().toISOString()
+                    createdAt: new Date().toISOString(),
+                    verified: true // Mark as verified upon creation
                 };
 
                 // Add user to the list
@@ -326,7 +327,7 @@
                 usernameInput.value = '';
                 passwordInput.value = '';
 
-                // Redirect to login after a delay
+                // Redirect to login.html after a delay
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 2000);
