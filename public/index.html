@@ -6,39 +6,40 @@
   <title>🤖 Bot Deployment Dashboard</title>
   <style>
     :root {
-      --bg-primary: #0a0e17;
-      --bg-secondary: #1a1f2d;
-      --bg-card: #121826;
-      --border-color: #2d3748;
-      --text-primary: #e2e8f0;
-      --text-secondary: #a0aec0;
-      --accent-blue: #4c6ef5;
-      --accent-green: #48bb78;
-      --accent-purple: #9f7aea;
-      --success: #48bb78;
-      --warning: #ed8936;
-      --danger: #f56565;
-      --button-primary: #4c6ef5;
-      --button-secondary: #2d3748;
+      --bg-primary: #0a2d4d;
+      --bg-secondary: #1a4a6b;
+      --bg-card: #123d59;
+      --border-color: #2a6a9c;
+      --text-primary: #e6f0f6;
+      --text-secondary: #b6cbe5;
+      --accent-blue: #60a5fa;
+      --accent-green: #86efac;
+      --accent-purple: #a78bfa;
+      --success: #86efac;
+      --warning: #fde68a;
+      --danger: #fca5a5;
+      --button-primary: #60a5fa;
+      --button-secondary: #2a6a9c;
     }
-    
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, var(--bg-primary), #161b29);
+      background: linear-gradient(135deg, var(--bg-primary), #1a4a6b);
       color: var(--text-primary);
       margin: 0;
       padding: 20px;
       min-height: 100vh;
+      overflow-x: hidden;
     }
-    
+
     h1 {
       text-align: center;
       color: var(--accent-blue);
       font-size: 2.2rem;
       margin-bottom: 30px;
-      text-shadow: 0 0 10px rgba(76, 110, 245, 0.3);
+      text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
     }
-    
+
     #logs {
       background-color: var(--bg-card);
       color: var(--text-primary);
@@ -53,7 +54,7 @@
       font-size: 0.9rem;
       box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
     }
-    
+
     .input-group {
       display: flex;
       flex-direction: column;
@@ -61,23 +62,42 @@
       max-width: 450px;
       margin: 0 auto;
     }
-    
+
+    .input-container {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .input-label {
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .input-description {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+
     input {
       padding: 12px 15px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
-      background-color: var(--bg-card);
+      background-color: var(--bg-secondary);
       color: var(--text-primary);
       font-size: 1rem;
       transition: all 0.3s ease;
     }
-    
+
     input:focus {
       outline: none;
       border-color: var(--accent-blue);
-      box-shadow: 0 0 0 3px rgba(76, 110, 245, 0.2);
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
     }
-    
+
     button {
       padding: 12px;
       border: none;
@@ -89,108 +109,226 @@
       transition: all 0.3s ease;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    
+
     #verifyBtn {
-      background: linear-gradient(135deg, var(--accent-purple), #7c3aed);
+      background: linear-gradient(135deg, var(--accent-blue), #3b82f6);
     }
-    
+
     #verifyBtn:hover {
-      background: linear-gradient(135deg, #6d28d9, #6b21a8);
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
       transform: translateY(-2px);
       box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
     }
-    
+
     #deployBtn {
-      background: linear-gradient(135deg, var(--button-primary), #3b5bdb);
+      background: linear-gradient(135deg, var(--button-primary), #2563eb);
     }
-    
+
     #deployBtn:hover {
-      background: linear-gradient(135deg, #3b5bdb, #2b4cb8);
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
       transform: translateY(-2px);
       box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
     }
-    
+
     .bot-card {
-      background: linear-gradient(135deg, var(--bg-card), #1a2230);
+      background: linear-gradient(135deg, var(--bg-card), #1a4a6b);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 15px;
       margin-top: 15px;
       width: 100%;
-      max-width: 400px; /* Reduced from 500px */
+      max-width: 400px;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
       display: flex;
       flex-direction: column;
-      gap: 8px; /* Reduced gap */
+      gap: 8px;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    
+
     .bot-card:hover {
       transform: translateY(-3px);
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
     }
-    
+
     .bot-card a {
       color: var(--accent-green);
       text-decoration: none;
       transition: color 0.3s ease;
     }
-    
+
     .bot-card a:hover {
-      color: #68d391;
+      color: #a7f3d0;
       text-decoration: underline;
     }
-    
+
     .manage-btn {
-      background: linear-gradient(135deg, var(--button-secondary), #1a202c);
-      font-size: 13px; /* Smaller font */
-      padding: 8px; /* Reduced padding */
+      background: linear-gradient(135deg, var(--button-secondary), #1e40af);
+      font-size: 13px;
+      padding: 8px;
       border: 1px solid var(--border-color);
     }
-    
+
     .manage-btn:hover {
-      background: linear-gradient(135deg, #2d3748, #2c3a50);
+      background: linear-gradient(135deg, #2a6a9c, #3b82f6);
       transform: translateY(-1px);
     }
-    
+
     #deployedBotsContainer {
       display: flex;
       flex-direction: column;
       align-items: center;
       margin-top: 30px;
     }
-    
+
     .bot-card strong {
       color: var(--text-secondary);
     }
-    
+
     .uptime {
       color: var(--accent-green);
       font-weight: bold;
     }
-    
+
     .status-active {
       color: var(--success);
     }
-    
+
     .status-inactive {
       color: var(--danger);
+    }
+
+    /* --- MENU BUTTON --- */
+    #menuBtn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: var(--button-secondary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 42px;
+      height: 42px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+
+    #menuDropdown {
+      position: fixed;
+      top: 0;
+      left: -50%;
+      width: 50%;
+      height: 100%;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-color);
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      padding: 20px;
+      transition: left 0.3s ease;
+      z-index: 999;
+      overflow-y: auto;
+      display: block; /* Changed from hidden to block */
+    }
+
+    #menuDropdown.show {
+      left: 0;
+    }
+
+    .menu-content {
+      margin-top: 60px;
+    }
+
+    /* --- MOBILE RESPONSIVE --- */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+      }
+      
+      .input-group {
+        max-width: 100%;
+        padding: 0 10px;
+      }
+      
+      .bot-card {
+        max-width: 100%;
+        margin-left: 10px;
+        margin-right: 10px;
+      }
+      
+      #logs {
+        height: 200px;
+        margin-left: 10px;
+        margin-right: 10px;
+      }
+      
+      #menuDropdown {
+        width: 70%;
+        left: -70%;
+      }
+      
+      #menuDropdown.show {
+        left: 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      input, button {
+        padding: 10px;
+        font-size: 14px;
+      }
+      
+      #menuBtn {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+      }
     }
   </style>
 </head>
 <body>
+  <button id="menuBtn">☰</button>
+  <div id="menuDropdown">
+    <div class="menu-content">
+      <h3>📊 Dashboard Info</h3>
+      <p>Bots Deployed: <span id="botCount">0/0</span></p>
+    </div>
+  </div>
+
   <h1>🤖 Trashcore Ultra Deployer</h1>
 
   <div class="input-group">
-    <input type="text" id="username" placeholder="GitHub Username" />
-    <input type="text" id="appName" placeholder="App Name" />
-    <input type="text" id="sessionId" placeholder="Session ID" />
+    <div class="input-container">
+      <label class="input-label">GitHub Username</label>
+      <input type="text" id="username" placeholder="Enter GitHub username" />
+      <div class="input-description">Your GitHub username where you forked the repository</div>
+    </div>
+    
+    <div class="input-container">
+      <label class="input-label">App Name</label>
+      <input type="text" id="appName" placeholder="Enter app name" />
+      <div class="input-description">Unique name for your Heroku app</div>
+    </div>
+    
+    <div class="input-container">
+      <label class="input-label">Session ID</label>
+      <input type="text" id="sessionId" placeholder="Enter session ID" />
+      <div class="input-description">Your WhatsApp session ID</div>
+    </div>
+    
     <button id="verifyBtn">✅ Verify Repo</button>
     <button id="deployBtn">🚀 Deploy Bot</button>
   </div>
 
   <div id="logs">📜 Deployment logs will appear here...</div>
-
   <div id="deployedBotsContainer"></div>
 
   <script>
@@ -198,15 +336,38 @@
     const REPO_OWNER = "Tennor-modz";
     const REPO_NAME = "trashcore-ultra";
 
+    // --- MENU FUNCTIONALITY ---
+    const menuBtn = document.getElementById("menuBtn");
+    const menuDropdown = document.getElementById("menuDropdown");
+    const botCountEl = document.getElementById("botCount");
+
+    menuBtn.addEventListener("click", () => {
+      menuDropdown.classList.toggle("show");
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+        menuDropdown.classList.remove('show');
+      }
+    });
+
+    function updateBotCount() {
+      const bots = JSON.parse(localStorage.getItem("deployedBots") || "[]");
+      botCountEl.textContent = `${bots.length}/${bots.length}`;
+    }
+
     // --- LOCAL STORAGE HANDLERS ---
     function saveDeployedBot(bot) {
       let bots = JSON.parse(localStorage.getItem("deployedBots") || "[]");
       bots.push(bot);
       localStorage.setItem("deployedBots", JSON.stringify(bots));
+      updateBotCount();
     }
 
     function loadDeployedBots() {
       const bots = JSON.parse(localStorage.getItem("deployedBots") || "[]");
+      updateBotCount();
       const container = document.getElementById("deployedBotsContainer");
       container.innerHTML = "";
       bots.forEach(bot => {
@@ -221,37 +382,10 @@
           <button class="manage-btn" onclick="window.location.href='manage-bot.html?app=${bot.name}'">⚙️ Manage Bot</button>
         `;
         container.appendChild(card);
-        // Use the saved timestamp or fallback to current time
         const startTime = bot.startTime || Date.now();
         startUptimeTimer(card.querySelector(".uptime"), startTime);
       });
     }
-
-    // --- FETCH APP INFO FROM API ---
-    async function fetchAppInfo(appName) {
-      try {
-        const res = await fetch(`${API_URL}/apps/${appName}`); // Create a route in your backend to return app info including created_at
-        const data = await res.json();
-        return data;
-      } catch {
-        return null;
-      }
-    }
-
-    // --- LIVE UPTIME FUNCTION ---
-    function startUptimeTimer(uptimeElement, createdAt) {
-      function update() {
-        const diff = Date.now() - new Date(createdAt).getTime();
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
-        uptimeElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
-      }
-      update();
-      setInterval(update, 1000);
-    }
-
-    loadDeployedBots();
 
     // --- VERIFY FORK ---
     async function checkFork(username) {
@@ -328,6 +462,21 @@
         evtSource.close();
       };
     });
+
+    // --- LIVE UPTIME ---
+    function startUptimeTimer(uptimeElement, createdAt) {
+      function update() {
+        const diff = Date.now() - new Date(createdAt).getTime();
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        uptimeElement.textContent = `${h}h ${m}m ${s}s`;
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
+    loadDeployedBots();
   </script>
 </body>
 </html>
