@@ -686,13 +686,24 @@
     }
 
     // --- VERIFY FORK ---
-    async function checkFork(username) {
-      if (username === REPO_OWNER) return true;
-      try {
-        const res = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}`);
-        return res.ok;
-      } catch { return false; }
+async function checkFork(username) {
+  if (username === REPO_OWNER) return true;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${username}/${REPO_NAME}`);
+    if (!res.ok) return false;
+
+    const data = await res.json();
+    // ✅ Check if this repo is actually forked from our original one
+    if (data.fork && data.parent && data.parent.full_name.toLowerCase() === `${REPO_OWNER}/${REPO_NAME}`.toLowerCase()) {
+      return true;
+    } else {
+      return false;
     }
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
 
     document.getElementById("verifyBtn").addEventListener("click", async () => {
       const username = document.getElementById("username").value.trim();
@@ -700,7 +711,7 @@
       if (!username) return logsEl.textContent = "⚠️ Enter GitHub username first.";
       logsEl.textContent = "⏳ Verifying fork...";
       const hasFork = await checkFork(username);
-      logsEl.textContent = hasFork ? "✅ Verified! You can now deploy." : "❌ Fork required.";
+      logsEl.textContent = hasFork ? "✅ verified fork from trashcore-ultra! You can now deploy." : "❌ Fork required.";
     });
 
     // --- DEPLOY BOT ---
