@@ -242,6 +242,52 @@
       margin-top: 60px;
     }
 
+    .contact-info {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .contact-info h4 {
+      color: var(--accent-purple);
+      margin-bottom: 15px;
+    }
+
+    .contact-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .email-btn {
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    }
+
+    .email-btn:hover {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .telegram-btn {
+      background: linear-gradient(135deg, #38bdf8, #0284c7);
+    }
+
+    .telegram-btn:hover {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
     /* --- MOBILE RESPONSIVE --- */
     @media (max-width: 768px) {
       h1 {
@@ -304,6 +350,12 @@
     <div class="menu-content">
       <h3>📊 Dashboard Info</h3>
       <p>Bots Deployed: <span id="botCount">0/0</span></p>
+      
+      <div class="contact-info">
+        <h4>📞 Contact Support</h4>
+        <a href="mailto:trashcoreclient@gmail.com" class="contact-btn email-btn">📧 Email Support</a>
+        <a href="https://t.me/trashcoredev" target="_blank" class="contact-btn telegram-btn">💬 Telegram Support</a>
+      </div>
     </div>
   </div>
 
