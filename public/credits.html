@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💳 Claim Daily Credits</title>
+  <style>
+    :root {
+      --bg-primary: #0a2d4d;
+      --bg-secondary: #1a4a6b;
+      --bg-card: #123d59;
+      --border-color: #2a6a9c;
+      --text-primary: #e6f0f6;
+      --text-secondary: #b6cbe5;
+      --accent-blue: #60a5fa;
+      --accent-green: #86efac;
+      --accent-purple: #a78bfa;
+      --success: #86efac;
+      --warning: #fde68a;
+      --danger: #fca5a5;
+      --button-primary: #60a5fa;
+      --button-secondary: #2a6a9c;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--bg-primary), #1a4a6b);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background: linear-gradient(135deg, var(--bg-card), #1a4a6b);
+      border: 1px solid var(--border-color);
+      border-radius: 15px;
+      padding: 30px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    h1 {
+      color: var(--accent-blue);
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+    }
+
+    .input-container {
+      margin: 20px 0;
+    }
+
+    .input-label {
+      display: block;
+      text-align: left;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    #usernameInput {
+      width: 100%;
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      margin-bottom: 15px;
+    }
+
+    #usernameInput:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+
+    .credit-info {
+      font-size: 1.2rem;
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(96, 165, 250, 0.1);
+      border-radius: 10px;
+      border-left: 3px solid var(--accent-blue);
+    }
+
+    .current-credits {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--accent-green);
+    }
+
+    .claim-btn {
+      background: linear-gradient(135deg, var(--accent-green), #4ade80);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 15px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .claim-btn:hover {
+      background: linear-gradient(135deg, #4ade80, #22c55e);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .claim-btn:disabled {
+      background: var(--button-secondary);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .timer {
+      margin-top: 15px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .instructions {
+      margin-top: 25px;
+      padding: 15px;
+      background: rgba(167, 139, 250, 0.1);
+      border-radius: 10px;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .instructions h3 {
+      color: var(--accent-purple);
+      margin-top: 0;
+    }
+
+    .instructions ul {
+      padding-left: 20px;
+    }
+
+    .instructions li {
+      margin-bottom: 8px;
+    }
+
+    .back-btn {
+      background: linear-gradient(135deg, var(--button-secondary), #1e40af);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 20px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .back-btn:hover {
+      background: linear-gradient(135deg, #2a6a9c, #3b82f6);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px;
+        margin: 10px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💳 Claim Daily Credits</h1>
+    
+    <div class="input-container">
+      <label class="input-label">GitHub Username</label>
+      <input type="text" id="usernameInput" placeholder="Enter your GitHub username">
+    </div>
+    
+    <div class="credit-info">
+      <p>You can claim <strong>10 credits</strong> per day</p>
+      <p>Current credits: <span id="currentCredits" class="current-credits">0</span>/10</p>
+    </div>
+    
+    <button id="claimBtn" class="claim-btn">Claim 10 Credits</button>
+    <div id="timer" class="timer"></div>
+    
+    <div class="instructions">
+      <h3>How it works:</h3>
+      <ul>
+        <li>Enter your GitHub username to claim credits</li>
+        <li>You can claim 10 credits once per day per username</li>
+        <li>Credits reset at midnight (local time)</li>
+        <li>Each bot deployment costs 10 credits</li>
+        <li>Credits are stored locally in your browser</li>
+      </ul>
+    </div>
+    
+    <a href="index.html" class="back-btn">← Back to Dashboard</a>
+  </div>
+
+  <script>
+    // --- CREDITS MANAGEMENT ---
+    function getUserCredits(username) {
+      if (!username) return null;
+      
+      const allCredits = JSON.parse(localStorage.getItem("userCredits") || "{}");
+      const userKey = `credits_${username.toLowerCase()}`;
+      const userData = allCredits[userKey] || { count: 0, lastClaimDate: null };
+      
+      const today = new Date().toDateString();
+      
+      // Reset credits if it's a new day
+      if (userData.lastClaimDate !== today) {
+        userData.count = 0;
+        userData.lastClaimDate = today;
+        allCredits[userKey] = userData;
+        localStorage.setItem("userCredits", JSON.stringify(allCredits));
+      }
+      
+      return userData;
+    }
+
+    function updateDisplay() {
+      const username = document.getElementById("usernameInput").value.trim();
+      if (!username) {
+        document.getElementById("currentCredits").textContent = "0";
+        document.getElementById("claimBtn").disabled = true;
+        document.getElementById("timer").textContent = "";
+        return;
+      }
+      
+      const credits = getUserCredits(username);
+      if (credits) {
+        document.getElementById("currentCredits").textContent = credits.count;
+        
+        // Check if user has already claimed today
+        const claimBtn = document.getElementById("claimBtn");
+        const timerDiv = document.getElementById("timer");
+        
+        if (credits.count >= 10) {
+          claimBtn.disabled = true;
+          claimBtn.textContent = "Already Claimed Today";
+          
+          // Calculate time until next day
+          const now = new Date();
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          tomorrow.setHours(0, 0, 0, 0);
+          
+          const timeDiff = tomorrow - now;
+          const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+          const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+          
+          timerDiv.textContent = `Next claim in: ${hours}h ${minutes}m`;
+        } else {
+          claimBtn.disabled = false;
+          claimBtn.textContent = "Claim 10 Credits";
+          timerDiv.textContent = "";
+        }
+      }
+    }
+
+    document.getElementById("claimBtn").addEventListener("click", () => {
+      const username = document.getElementById("usernameInput").value.trim();
+      if (!username) {
+        alert("Please enter your GitHub username first.");
+        return;
+      }
+      
+      const credits = getUserCredits(username);
+      if (credits && credits.count < 10) {
+        // Add 10 credits (capped at 10)
+        const allCredits = JSON.parse(localStorage.getItem("userCredits") || "{}");
+        const userKey = `credits_${username.toLowerCase()}`;
+        
+        allCredits[userKey] = {
+          count: Math.min(credits.count + 10, 10),
+          lastClaimDate: new Date().toDateString()
+        };
+        
+        localStorage.setItem("userCredits", JSON.stringify(allCredits));
+        
+        updateDisplay();
+        alert("✅ Successfully claimed 10 credits!");
+      }
+    });
+
+    // Update display when username input changes
+    document.getElementById("usernameInput").addEventListener("input", updateDisplay);
+
+    // Initialize display
+    updateDisplay();
+    setInterval(updateDisplay, 1000);
+  </script>
+</body>
+</html>
