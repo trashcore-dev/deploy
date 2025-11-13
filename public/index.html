@@ -288,6 +288,21 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
 
+    /* --- CREDITS INFO --- */
+    .credits-info {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 15px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .credits-count {
+      font-weight: bold;
+      color: var(--accent-green);
+    }
+
     /* --- MOBILE RESPONSIVE --- */
     @media (max-width: 768px) {
       h1 {
@@ -362,6 +377,12 @@
   <h1>🤖 Trashcore Ultra Deployer</h1>
 
   <div class="input-group">
+    <div class="credits-info">
+      Credits: <span id="creditsCount" class="credits-count">0</span>/10
+      <br>
+      <a href="credits.html" style="color: var(--accent-blue); text-decoration: none;">Claim Daily Credits</a>
+    </div>
+    
     <div class="input-container">
       <label class="input-label">GitHub Username</label>
       <input type="text" id="username" placeholder="Enter GitHub username" />
@@ -391,6 +412,26 @@
     const API_URL = "https://render-deploy-7mol.onrender.com";
     const REPO_OWNER = "Tennor-modz";
     const REPO_NAME = "trashcore-ultra";
+
+    // --- CREDITS MANAGEMENT ---
+    function getCredits() {
+      const credits = JSON.parse(localStorage.getItem("credits") || '{"count": 0, "lastClaimDate": null}');
+      const today = new Date().toDateString();
+      
+      // Reset credits if it's a new day
+      if (credits.lastClaimDate !== today) {
+        credits.count = 0;
+        credits.lastClaimDate = today;
+        localStorage.setItem("credits", JSON.stringify(credits));
+      }
+      
+      return credits.count;
+    }
+
+    function updateCreditsDisplay() {
+      const credits = getCredits();
+      document.getElementById("creditsCount").textContent = credits;
+    }
 
     // --- MENU FUNCTIONALITY ---
     const menuBtn = document.getElementById("menuBtn");
@@ -463,6 +504,12 @@
 
     // --- DEPLOY BOT ---
     document.getElementById("deployBtn").addEventListener("click", async () => {
+      const credits = getCredits();
+      if (credits < 10) {
+        alert("You need 10 credits to deploy a bot. Visit credits.html to claim daily credits.");
+        return;
+      }
+
       const username = document.getElementById("username").value.trim();
       const appName = document.getElementById("appName").value.trim();
       const sessionId = document.getElementById("sessionId").value.trim();
@@ -471,6 +518,12 @@
 
       if (!username || !appName || !sessionId)
         return logsEl.textContent = "⚠️ Fill all fields.";
+
+      // Deduct 10 credits
+      const creditsData = JSON.parse(localStorage.getItem("credits") || '{"count": 0, "lastClaimDate": null}');
+      creditsData.count -= 10;
+      localStorage.setItem("credits", JSON.stringify(creditsData));
+      updateCreditsDisplay();
 
       logsEl.textContent = "✅ Verified. Starting deployment...\n";
       const tarballUrl = `https://github.com/${username}/${REPO_NAME}/archive/refs/heads/main.tar.gz`;
@@ -532,6 +585,8 @@
       setInterval(update, 1000);
     }
 
+    // Initialize
+    updateCreditsDisplay();
     loadDeployedBots();
   </script>
 </body>
