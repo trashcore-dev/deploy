@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔐 Create Account - Bot Deployer</title>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #334155;
+      --border-color: #475569;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --accent-blue: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-purple: #a78bfa;
+      --success: #4ade80;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --button-primary: #38bdf8;
+      --button-secondary: #64748b;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, var(--bg-primary), #1e293b);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      background-attachment: fixed;
+    }
+
+    .auth-container {
+      background: linear-gradient(135deg, var(--bg-card), #475569);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 30px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(71, 85, 105, 0.6);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--accent-blue);
+      font-size: 2rem;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+      font-weight: 700;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .input-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-label {
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-label::before {
+      content: "•";
+      color: var(--accent-blue);
+      font-size: 1.2rem;
+    }
+
+    .input-description {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      opacity: 0.7;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    input {
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background-color: rgba(30, 41, 59, 0.8);
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(71, 85, 105, 0.5);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
+      background-color: rgba(30, 41, 59, 0.9);
+    }
+
+    button {
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    #sendOtpBtn {
+      background: linear-gradient(135deg, var(--accent-blue), #0ea5e9);
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+    }
+
+    #sendOtpBtn:hover {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+    }
+
+    #verifyBtn {
+      background: linear-gradient(135deg, var(--accent-green), #22c55e);
+      box-shadow: 0 4px 15px rgba(74, 222, 128, 0.3);
+    }
+
+    #verifyBtn:hover {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 6px 20px rgba(74, 222, 128, 0.4);
+    }
+
+    .form-step {
+      display: none;
+    }
+
+    .form-step.active {
+      display: block;
+    }
+
+    .otp-input {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .otp-input input {
+      width: 50px;
+      height: 50px;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+
+    .countdown {
+      text-align: center;
+      margin-top: 10px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .error-message {
+      color: var(--danger);
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+
+    .success-message {
+      color: var(--success);
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+
+    .login-link {
+      text-align: center;
+      margin-top: 20px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .login-link a {
+      color: var(--accent-blue);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+
+    /* --- SCROLLBAR STYLING --- */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent-blue);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #0ea5e9;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <h1>🔐 Create Account</h1>
+    <p class="subtitle">Sign up to access the bot deployment dashboard</p>
+
+    <!-- Step 1: Registration Form -->
+    <div id="step1" class="form-step active">
+      <div class="input-group">
+        <div class="input-container">
+          <label class="input-label">Email Address</label>
+          <input type="email" id="email" placeholder="Enter your email address" />
+          <div class="input-description">We'll send a verification code to this email</div>
+        </div>
+        
+        <div class="input-container">
+          <label class="input-label">Username</label>
+          <input type="text" id="username" placeholder="Choose a username" />
+          <div class="input-description">Your unique identifier for the dashboard</div>
+        </div>
+        
+        <div class="input-container">
+          <label class="input-label">Password</label>
+          <input type="password" id="password" placeholder="Create a password" />
+          <div class="input-description">At least 8 characters with letters and numbers</div>
+        </div>
+        
+        <button id="sendOtpBtn">📧 Send Verification Code</button>
+      </div>
+      
+      <div id="error1" class="error-message"></div>
+    </div>
+
+    <!-- Step 2: OTP Verification -->
+    <div id="step2" class="form-step">
+      <div class="input-group">
+        <div class="input-container">
+          <label class="input-label">Enter Verification Code</label>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 5px 0 15px 0;">
+            Enter the 6-digit code sent to <strong id="emailDisplay"></strong>
+          </p>
+          
+          <div class="otp-input">
+            <input type="text" id="otp1" maxlength="1" />
+            <input type="text" id="otp2" maxlength="1" />
+            <input type="text" id="otp3" maxlength="1" />
+            <input type="text" id="otp4" maxlength="1" />
+            <input type="text" id="otp5" maxlength="1" />
+            <input type="text" id="otp6" maxlength="1" />
+          </div>
+          
+          <div class="countdown" id="countdown">Resend code in: <span id="resendTimer">60</span>s</div>
+        </div>
+        
+        <button id="verifyBtn">✅ Verify Account</button>
+      </div>
+      
+      <div id="error2" class="error-message"></div>
+      <div id="success2" class="success-message"></div>
+    </div>
+
+    <div class="login-link">
+      Already have an account? <a href="login.html">Sign in here</a>
+    </div>
+  </div>
+
+  <script>
+    // Global variables
+    let otp = '';
+    let email = '';
+    let username = '';
+    let password = '';
+    let countdown = 60;
+    let countdownInterval;
+
+    // DOM Elements
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const emailInput = document.getElementById('email');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const sendOtpBtn = document.getElementById('sendOtpBtn');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const error1 = document.getElementById('error1');
+    const error2 = document.getElementById('error2');
+    const success2 = document.getElementById('success2');
+    const emailDisplay = document.getElementById('emailDisplay');
+    const countdownEl = document.getElementById('countdown');
+    const resendTimer = document.getElementById('resendTimer');
+
+    // OTP input fields
+    const otpInputs = [
+      document.getElementById('otp1'),
+      document.getElementById('otp2'),
+      document.getElementById('otp3'),
+      document.getElementById('otp4'),
+      document.getElementById('otp5'),
+      document.getElementById('otp6')
+    ];
+
+    // Auto-move to next input for OTP
+    otpInputs.forEach((input, index) => {
+      input.addEventListener('input', () => {
+        if (input.value && index < otpInputs.length - 1) {
+          otpInputs[index + 1].focus();
+        }
+      });
+      
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !input.value && index > 0) {
+          otpInputs[index - 1].focus();
+        }
+      });
+    });
+
+    // Send OTP button click handler
+    sendOtpBtn.addEventListener('click', async () => {
+      email = emailInput.value.trim();
+      username = usernameInput.value.trim();
+      password = passwordInput.value.trim();
+      
+      // Validation
+      if (!email || !username || !password) {
+        error1.textContent = 'Please fill in all fields';
+        return;
+      }
+      
+      if (!isValidEmail(email)) {
+        error1.textContent = 'Please enter a valid email address';
+        return;
+      }
+      
+      if (password.length < 8) {
+        error1.textContent = 'Password must be at least 8 characters';
+        return;
+      }
+      
+      try {
+        // Show loading state
+        sendOtpBtn.textContent = 'Sending...';
+        sendOtpBtn.disabled = true;
+        
+        // Call backend API to send OTP
+        const response = await fetch('https://signup-xyr8.onrender.com/api/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: email,
+            username: username,
+            password: password
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Store user data temporarily
+          localStorage.setItem('tempUserData', JSON.stringify({
+            email: email,
+            username: username,
+            password: password
+          }));
+          
+          // Show verification step
+          emailDisplay.textContent = email;
+          step1.classList.remove('active');
+          step2.classList.add('active');
+          
+          // Start countdown
+          startCountdown();
+          
+          // Focus first OTP input
+          otpInputs[0].focus();
+          
+          error1.textContent = '';
+        } else {
+          error1.textContent = data.error || 'Failed to send verification code';
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        error1.textContent = 'Network error. Please try again.';
+      } finally {
+        // Reset button state
+        sendOtpBtn.textContent = '📧 Send Verification Code';
+        sendOtpBtn.disabled = false;
+      }
+    });
+
+    // Verify button click handler
+    verifyBtn.addEventListener('click', async () => {
+      const enteredOtp = otpInputs.map(input => input.value).join('');
+      
+      if (enteredOtp.length !== 6) {
+        error2.textContent = 'Please enter the complete 6-digit code';
+        return;
+      }
+      
+      try {
+        // Show loading state
+        verifyBtn.textContent = 'Verifying...';
+        verifyBtn.disabled = true;
+        
+        // Call backend API to verify OTP
+        const response = await fetch('https://signup-xyr8.onrender.com/api/verify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: email,
+            otp: enteredOtp,
+            username: username,
+            password: password
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Mark user as logged in
+          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem('currentUser', JSON.stringify({
+            email: data.user.email,
+            username: data.user.username
+          }));
+          
+          // Show success and redirect
+          success2.textContent = 'Account verified successfully! Redirecting...';
+          error2.textContent = '';
+          
+          setTimeout(() => {
+            window.location.href = 'deploy.html';
+          }, 2000);
+        } else {
+          error2.textContent = data.error || 'Invalid verification code';
+          success2.textContent = '';
+        }
+      } catch (error) {
+        console.error('Verification error:', error);
+        error2.textContent = 'Network error. Please try again.';
+      } finally {
+        // Reset button state
+        verifyBtn.textContent = '✅ Verify Account';
+        verifyBtn.disabled = false;
+      }
+    });
+
+    // Start resend countdown
+    function startCountdown() {
+      countdown = 60;
+      resendTimer.textContent = countdown;
+      countdownEl.style.display = 'block';
+      
+      clearInterval(countdownInterval);
+      countdownInterval = setInterval(() => {
+        countdown--;
+        resendTimer.textContent = countdown;
+        
+        if (countdown <= 0) {
+          clearInterval(countdownInterval);
+          countdownEl.innerHTML = 'Resend code now? <a href="#" id="resendLink" style="color: var(--accent-blue); text-decoration: none;">Click here</a>';
+          
+          document.getElementById('resendLink').addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            try {
+              // Resend OTP
+              const response = await fetch('https://signup-xyr8.onrender.com/api/register', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  email: email,
+                  username: username,
+                  password: password
+                })
+              });
+              
+              const data = await response.json();
+              
+              if (response.ok) {
+                startCountdown();
+                error2.textContent = '';
+              } else {
+                error2.textContent = data.error || 'Failed to resend code';
+              }
+            } catch (error) {
+              console.error('Resend error:', error);
+              error2.textContent = 'Network error. Please try again.';
+            }
+          });
+        }
+      }, 1000);
+    }
+
+    // Email validation helper
+    function isValidEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+
+    // Clear temporary data on page load
+    window.addEventListener('load', () => {
+      // Clear any previous temporary data
+      localStorage.removeItem('tempUserData');
+    });
+  </script>
+</body>
+</html>
