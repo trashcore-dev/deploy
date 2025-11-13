@@ -470,7 +470,7 @@
     <div class="credits-info">
       Credits: <span id="creditsCount" class="credits-count">0</span>/10
       <br>
-      <a href="credits.html" style="color: var(--accent-blue); text-decoration: none; font-weight: 500;">Claim Daily Credits</a>
+      <a href="#" id="claimCreditsLink" style="color: var(--accent-blue); text-decoration: none; font-weight: 500;">Claim Daily Credits</a>
     </div>
     
     <div class="input-container">
@@ -522,6 +522,27 @@
       const credits = getCredits();
       document.getElementById("creditsCount").textContent = credits;
     }
+
+    // Handle credits claiming
+    document.getElementById("claimCreditsLink").addEventListener("click", function(e) {
+      e.preventDefault();
+      const credits = JSON.parse(localStorage.getItem("credits") || '{"count": 0, "lastClaimDate": null}');
+      const today = new Date().toDateString();
+      
+      // Check if we can claim today
+      if (credits.lastClaimDate === today) {
+        alert("You've already claimed your daily credits today! Come back tomorrow.");
+        return;
+      }
+      
+      // Set credits to 10 for today
+      credits.count = 10;
+      credits.lastClaimDate = today;
+      localStorage.setItem("credits", JSON.stringify(credits));
+      
+      updateCreditsDisplay();
+      alert("✅ 10 credits claimed successfully! You now have 10/10 credits.");
+    });
 
     // --- MENU FUNCTIONALITY ---
     const menuBtn = document.getElementById("menuBtn");
