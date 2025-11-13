@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔐 Login (Client-Side)</title>
+  <title>🔐 Login (Client-Side - SHA-256)</title>
   <style>
     :root {
       --bg-primary: #0f172a;
@@ -221,94 +221,81 @@
   </div>
 
   <script>
-    // Load bcryptjs library dynamically
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js';
-    document.head.appendChild(script);
+    // Simple SHA-256 hashing function using the Web Crypto API
+    async function hashPasswordSHA256(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
 
-    script.onload = function() {
-        console.log("bcryptjs loaded");
+    const loginBtn = document.getElementById('loginBtn');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
 
-        const loginBtn = document.getElementById('loginBtn');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const errorMessage = document.getElementById('errorMessage');
-        const successMessage = document.getElementById('successMessage');
+    loginBtn.addEventListener('click', async () => {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
 
-        loginBtn.addEventListener('click', async () => {
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
+        if (!username || !password) {
+            errorMessage.textContent = 'Please enter both username and password';
+            successMessage.textContent = '';
+            return;
+        }
 
-            if (!username || !password) {
-                errorMessage.textContent = 'Please enter both username and password';
+        try {
+            // Show loading state
+            loginBtn.textContent = 'Signing In...';
+            loginBtn.disabled = true;
+
+            // Retrieve users from localStorage
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+
+            // Find user by username
+            const user = users.find(u => u.username === username);
+
+            if (!user) {
+                errorMessage.textContent = 'Invalid credentials';
                 successMessage.textContent = '';
                 return;
             }
 
-            try {
-                // Show loading state
-                loginBtn.textContent = 'Signing In...';
-                loginBtn.disabled = true;
+            // Hash the entered password using SHA-256
+            const hashedEnteredPassword = await hashPasswordSHA256(password);
 
-                // Retrieve users from localStorage
-                const users = JSON.parse(localStorage.getItem('users') || '[]');
+            // Compare the hashed entered password with the stored hash
+            if (hashedEnteredPassword === user.password) {
+                // Mark user as logged in
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('currentUser', JSON.stringify({
+                    email: user.email,
+                    username: user.username
+                }));
 
-                // Find user by username (changed from email)
-                const user = users.find(u => u.username === username);
+                successMessage.textContent = 'Login successful! Redirecting...';
+                errorMessage.textContent = '';
 
-                if (!user) {
-                    errorMessage.textContent = 'Invalid credentials';
-                    successMessage.textContent = '';
-                    return;
-                }
-
-                // Compare entered password with stored hash using bcryptjs
-                const isPasswordValid = await new Promise((resolve, reject) => {
-                    bcrypt.compare(password, user.password, function(err, res) {
-                        if (err) {
-                            console.error('Comparison error:', err);
-                            reject(err);
-                        } else {
-                            resolve(res);
-                        }
-                    });
-                });
-
-                if (isPasswordValid) {
-                    // Mark user as logged in
-                    localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('currentUser', JSON.stringify({
-                        email: user.email, // Still store email if needed elsewhere
-                        username: user.username
-                    }));
-
-                    successMessage.textContent = 'Login successful! Redirecting...';
-                    errorMessage.textContent = '';
-
-                    // Redirect to dashboard (replace 'deploy.html' with your dashboard page)
-                    setTimeout(() => {
-                        window.location.href = 'deploy.html';
-                    }, 1500);
-                } else {
-                    errorMessage.textContent = 'Invalid credentials';
-                    successMessage.textContent = '';
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                errorMessage.textContent = 'An error occurred during login.';
+                // Redirect to dashboard (replace 'deploy.html' with your dashboard page)
+                setTimeout(() => {
+                    window.location.href = 'deploy.html';
+                }, 1500);
+            } else {
+                errorMessage.textContent = 'Invalid credentials';
                 successMessage.textContent = '';
-            } finally {
-                // Reset button state
-                loginBtn.textContent = 'Sign In';
-                loginBtn.disabled = false;
             }
-        });
-    };
-
-    script.onerror = function() {
-        console.error("Failed to load bcryptjs library");
-        document.getElementById('errorMessage').textContent = 'Failed to load security library. Please try again.';
-    };
+        } catch (error) {
+            console.error('Login error:', error);
+            errorMessage.textContent = 'An error occurred during login.';
+            successMessage.textContent = '';
+        } finally {
+            // Reset button state
+            loginBtn.textContent = 'Sign In';
+            loginBtn.disabled = false;
+        }
+    });
   </script>
 </body>
 </html>
