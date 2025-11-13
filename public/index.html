@@ -153,60 +153,64 @@
       box-shadow: 0 6px 20px rgba(74, 222, 128, 0.4);
     }
 
-<style>
-.bot-card {
-  background: linear-gradient(135deg, var(--bg-card), #334155);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  width: 140px;       /* much smaller width */
-  height: 140px;      /* fixed height for square look */
-  padding: 8px;       /* tighter padding */
-  margin: 6px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  text-align: center;
-  font-size: 11px;    /* smaller text */
-  color: var(--text-primary);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  transition: all 0.3s ease;
-}
+    .bot-card {
+      background: linear-gradient(135deg, var(--bg-card), #475569);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 16px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(71, 85, 105, 0.6);
+    }
 
-.bot-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.3);
-}
+    .bot-card:hover {
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+      border-color: var(--accent-blue);
+    }
 
-.bot-card strong {
-  display: block;
-  font-size: 11px;
-  color: var(--accent-blue);
-}
+    .bot-card a {
+      color: var(--accent-green);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
 
-.manage-btn {
-  background: var(--accent-blue);
-  border: none;
-  color: white;
-  font-size: 10px;
-  padding: 4px 6px;
-  border-radius: 6px;
-  margin-top: 4px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
+    .bot-card a:hover {
+      color: #86efac;
+      text-decoration: underline;
+      transform: translateX(2px);
+    }
 
-.manage-btn:hover {
-  background: #2563eb;
-}
+    .manage-btn {
+      background: linear-gradient(135deg, var(--button-secondary), #475569);
+      font-size: 14px;
+      padding: 10px 16px;
+      border: 1px solid var(--border-color);
+      margin-top: 8px;
+      font-weight: 500;
+    }
 
-#deployedBotsContainer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
-}
-<style>
+    .manage-btn:hover {
+      background: linear-gradient(135deg, #475569, var(--accent-blue));
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+    }
+
+    #deployedBotsContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 30px;
+      gap: 16px;
+    }
 
     .bot-card strong {
       color: var(--text-secondary);
@@ -557,12 +561,25 @@
         const card = document.createElement("div");
         card.className = "bot-card";
         card.innerHTML = `
-          <strong>App Name:</strong> ${bot.name}<br>
-          <strong>Status:</strong> <span class="status-active">🟢 Active</span><br>
-          <strong>Uptime:</strong> <span class="uptime">00h 00m 00s</span><br>
-          <strong>Date:</strong> ${bot.date}<br>
-          <strong>Link:</strong> <a href="${bot.url}" target="_blank">${bot.url}</a><br>
-          <button class="manage-btn" onclick="window.location.href='manage-bot.html?app=${bot.name}'">⚙️ Manage Bot</button>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div>
+              <strong style="font-size: 1.1rem; display: block; margin-bottom: 2px;">${bot.name}</strong>
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
+                <span class="status-active">🟢 Active</span>
+                <span class="uptime">${formatTimeDifference(Date.now() - new Date(bot.startTime).getTime())}</span>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 2px;">${new Date(bot.startTime).toLocaleTimeString()}</div>
+              <div style="font-size: 0.75rem; color: var(--text-secondary);">${new Date(bot.startTime).toLocaleDateString()}</div>
+            </div>
+          </div>
+          <div style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 8px;">
+            <div style="margin-bottom: 8px;">
+              <a href="${bot.url}" target="_blank" style="font-size: 0.85rem; word-break: break-all;">🔗 ${bot.url}</a>
+            </div>
+            <button class="manage-btn" onclick="window.location.href='manage-bot.html?app=${bot.name}'" style="width: 100%;">⚙️ Manage Bot</button>
+          </div>
         `;
         container.appendChild(card);
         const startTime = bot.startTime || Date.now();
@@ -636,12 +653,25 @@
           const card = document.createElement("div");
           card.className = "bot-card";
           card.innerHTML = `
-            <strong>App Name:</strong> ${botInfo.name}<br>
-            <strong>Status:</strong> <span class="status-active">🟢 Active</span><br>
-            <strong>Uptime:</strong> <span class="uptime">00h 00m 00s</span><br>
-            <strong>Date:</strong> ${botInfo.date}<br>
-            <strong>Link:</strong> <a href="${botInfo.url}" target="_blank">${botInfo.url}</a><br>
-            <button class="manage-btn" onclick="window.location.href='manage-bot.html?app=${botInfo.name}'">⚙️ Manage Bot</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <div>
+                <strong style="font-size: 1.1rem; display: block; margin-bottom: 2px;">${botInfo.name}</strong>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
+                  <span class="status-active">🟢 Active</span>
+                  <span class="uptime">00h 00m 00s</span>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 2px;">${new Date(botInfo.startTime).toLocaleTimeString()}</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">${new Date(botInfo.startTime).toLocaleDateString()}</div>
+              </div>
+            </div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 8px;">
+              <div style="margin-bottom: 8px;">
+                <a href="${botInfo.url}" target="_blank" style="font-size: 0.85rem; word-break: break-all;">🔗 ${botInfo.url}</a>
+              </div>
+              <button class="manage-btn" onclick="window.location.href='manage-bot.html?app=${botInfo.name}'" style="width: 100%;">⚙️ Manage Bot</button>
+            </div>
           `;
           container.prepend(card);
           // Apply the saved timestamp to the new bot
@@ -669,6 +699,13 @@
       }
       update();
       setInterval(update, 1000);
+    }
+
+    function formatTimeDifference(diff) {
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      return `${h}h ${m}m ${s}s`;
     }
 
     // Initialize
