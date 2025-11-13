@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔐 Create Account (Client-Side)</title>
+  <title>🔐 Create Account (Client-Side - SHA-256)</title>
   <style>
     :root {
       --bg-primary: #0f172a;
@@ -237,122 +237,108 @@
   </div>
 
   <script>
-    // Load bcryptjs library dynamically
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js';
-    document.head.appendChild(script);
+    // Simple SHA-256 hashing function using the Web Crypto API
+    async function hashPasswordSHA256(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
 
-    script.onload = async function() {
-        console.log("bcryptjs loaded");
+    const registerBtn = document.getElementById('registerBtn');
+    const emailInput = document.getElementById('email');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const error1 = document.getElementById('error1');
+    const success1 = document.getElementById('success1');
 
-        const registerBtn = document.getElementById('registerBtn');
-        const emailInput = document.getElementById('email');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const error1 = document.getElementById('error1');
-        const success1 = document.getElementById('success1');
+    registerBtn.addEventListener('click', async () => {
+        const email = emailInput.value.trim();
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
 
-        registerBtn.addEventListener('click', async () => {
-            const email = emailInput.value.trim();
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
-
-            // Validation
-            if (!email || !username || !password) {
-                error1.textContent = 'Please fill in all fields';
-                success1.textContent = '';
-                return;
-            }
-
-            if (!isValidEmail(email)) {
-                error1.textContent = 'Please enter a valid email address';
-                success1.textContent = '';
-                return;
-            }
-
-            if (password.length < 8) {
-                error1.textContent = 'Password must be at least 8 characters';
-                success1.textContent = '';
-                return;
-            }
-
-            try {
-                // Show loading state
-                registerBtn.textContent = 'Signing Up...';
-                registerBtn.disabled = true;
-
-                // Check if user already exists
-                const users = JSON.parse(localStorage.getItem('users') || '[]');
-                const existingUser = users.find(u => u.email === email || u.username === username);
-
-                if (existingUser) {
-                    error1.textContent = 'User with this email or username already exists';
-                    success1.textContent = '';
-                    return;
-                }
-
-                // Hash the password using bcryptjs
-                const hashedPassword = await new Promise((resolve, reject) => {
-                    bcrypt.hash(password, 10, function(err, hash) {
-                        if (err) {
-                            console.error('Hashing error:', err);
-                            reject(err);
-                        } else {
-                            resolve(hash);
-                        }
-                    });
-                });
-
-                // Create user object - Mark as verified upon creation
-                const newUser = {
-                    email: email,
-                    username: username,
-                    password: hashedPassword, // Store the hashed password
-                    createdAt: new Date().toISOString(),
-                    verified: true // Mark as verified upon creation
-                };
-
-                // Add user to the list
-                users.push(newUser);
-
-                // Save updated users list to localStorage
-                localStorage.setItem('users', JSON.stringify(users));
-
-                // Show success message
-                success1.textContent = 'Account created successfully! Redirecting to login...';
-                error1.textContent = '';
-
-                // Clear inputs
-                emailInput.value = '';
-                usernameInput.value = '';
-                passwordInput.value = '';
-
-                // Redirect to login.html after a delay
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
-
-            } catch (error) {
-                console.error('Registration error:', error);
-                error1.textContent = 'An error occurred during registration.';
-                success1.textContent = '';
-            } finally {
-                // Reset button state
-                registerBtn.textContent = 'Sign Up';
-                registerBtn.disabled = false;
-            }
-        });
-
-        function isValidEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
+        // Validation
+        if (!email || !username || !password) {
+            error1.textContent = 'Please fill in all fields';
+            success1.textContent = '';
+            return;
         }
-    };
 
-    script.onerror = function() {
-        console.error("Failed to load bcryptjs library");
-        document.getElementById('error1').textContent = 'Failed to load security library. Please try again.';
-    };
+        if (!isValidEmail(email)) {
+            error1.textContent = 'Please enter a valid email address';
+            success1.textContent = '';
+            return;
+        }
+
+        if (password.length < 8) {
+            error1.textContent = 'Password must be at least 8 characters';
+            success1.textContent = '';
+            return;
+        }
+
+        try {
+            // Show loading state
+            registerBtn.textContent = 'Signing Up...';
+            registerBtn.disabled = true;
+
+            // Check if user already exists
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const existingUser = users.find(u => u.email === email || u.username === username);
+
+            if (existingUser) {
+                error1.textContent = 'User with this email or username already exists';
+                success1.textContent = '';
+                return;
+            }
+
+            // Hash the password using SHA-256 (synchronous in this context due to async/await)
+            const hashedPassword = await hashPasswordSHA256(password);
+
+            // Create user object - Mark as verified upon creation
+            const newUser = {
+                email: email,
+                username: username,
+                password: hashedPassword, // Store the hashed password
+                createdAt: new Date().toISOString(),
+                verified: true // Mark as verified upon creation
+            };
+
+            // Add user to the list
+            users.push(newUser);
+
+            // Save updated users list to localStorage
+            localStorage.setItem('users', JSON.stringify(users));
+
+            // Show success message
+            success1.textContent = 'Account created successfully! Redirecting to login...';
+            error1.textContent = '';
+
+            // Clear inputs
+            emailInput.value = '';
+            usernameInput.value = '';
+            passwordInput.value = '';
+
+            // Redirect to login.html after a delay
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+
+        } catch (error) {
+            console.error('Registration error:', error);
+            error1.textContent = 'An error occurred during registration.';
+            success1.textContent = '';
+        } finally {
+            // Reset button state
+            registerBtn.textContent = 'Sign Up';
+            registerBtn.disabled = false;
+        }
+    });
+
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
   </script>
 </body>
 </html>
