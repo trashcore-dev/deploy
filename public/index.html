@@ -217,7 +217,7 @@
     #menuDropdown {
       position: fixed;
       top: 0;
-      left: -50%;
+      left: -50%; /* Start off-screen */
       width: 50%;
       height: 100%;
       background: var(--bg-card);
@@ -227,11 +227,15 @@
       transition: left 0.3s ease;
       z-index: 999;
       overflow-y: auto;
-      display: block; /* Changed from hidden to block */
+      display: block;
+      opacity: 0; /* Hidden by default */
+      visibility: hidden; /* Not visible */
     }
 
     #menuDropdown.show {
-      left: 0;
+      left: 0; /* Slide in from left */
+      opacity: 1; /* Make visible */
+      visibility: visible; /* Make visible */
     }
 
     .menu-content {
