@@ -607,13 +607,15 @@
 
     // --- DEPLOY BOT ---
     document.getElementById("deployBtn").addEventListener("click", async () => {
-      const credits = getCredits();
-      if (credits < 10) {
+      const username = document.getElementById("username").value.trim();
+      const isRepoOwner = username === REPO_OWNER;
+      const credits = isRepoOwner ? 10 : getCredits(); // No credits needed if repo owner
+      
+      if (!isRepoOwner && credits < 10) {
         alert("You need 10 credits to deploy a bot. Visit credits.html to claim daily credits.");
         return;
       }
 
-      const username = document.getElementById("username").value.trim();
       const appName = document.getElementById("appName").value.trim();
       const sessionId = document.getElementById("sessionId").value.trim();
       const logsEl = document.getElementById("logs");
@@ -622,13 +624,15 @@
       if (!username || !appName || !sessionId)
         return logsEl.textContent = "⚠️ Fill all fields.";
 
-      // Deduct 10 credits
-      const creditsData = JSON.parse(localStorage.getItem("credits") || '{"count": 0, "lastClaimDate": null}');
-      creditsData.count -= 10;
-      localStorage.setItem("credits", JSON.stringify(creditsData));
-      updateCreditsDisplay();
+      // Deduct credits only if not repo owner
+      if (!isRepoOwner) {
+        const creditsData = JSON.parse(localStorage.getItem("credits") || '{"count": 0, "lastClaimDate": null}');
+        creditsData.count -= 10;
+        localStorage.setItem("credits", JSON.stringify(creditsData));
+        updateCreditsDisplay();
+      }
 
-      logsEl.textContent = "✅ Verified. Starting deployment...\n";
+      logsEl.textContent = isRepoOwner ? "✅ Verified as repo owner. Starting deployment...\n" : "✅ Verified. Starting deployment...\n";
       const tarballUrl = `https://github.com/${username}/${REPO_NAME}/archive/refs/heads/main.tar.gz`;
       const url = `${API_URL}/deploy/${appName}/logs?repo=${encodeURIComponent(tarballUrl)}&sessionId=${encodeURIComponent(sessionId)}`;
       const evtSource = new EventSource(url);
